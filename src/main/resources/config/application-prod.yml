@@ -35,8 +35,8 @@ spring:
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:postgresql://localhost:5432/gateway
-        username: gateway
-        password:
+        username: ecos
+        password: ecos
         hikari:
             poolName: Hikari
             auto-commit: false
