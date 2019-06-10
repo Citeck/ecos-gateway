@@ -45,8 +45,8 @@ spring:
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:h2:file:./target/h2db/db/gateway;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
-        username: ecos
-        password: ecos
+        username: gateway
+        password:
         hikari:
             poolName: Hikari
             auto-commit: false
