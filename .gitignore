@@ -17,6 +17,7 @@ logs
 build
 target
 */node/*
+node/*
 nodejs/*
 node_modules/*
 */node_modules/*
