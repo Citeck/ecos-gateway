@@ -152,7 +152,7 @@ public class RecordsConfig extends RecordsServiceFactory {
         return restTemplateBuilder
             .requestFactory(SkipSslVerificationHttpRequestFactory.class)
             .additionalInterceptors(languageRelayingInterceptor)
-            .rootUri(alfrescoClientProperties.getSchema() + "://gateway")
+            .rootUri("http://gateway")
             .build();
     }
 
