@@ -1,10 +1,8 @@
-# gateway
+# ECOS - Gateway
 
-This application was generated using JHipster 5.8.1, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v5.8.1](https://www.jhipster.tech/documentation-archive/v5.8.1).
+This is a "gateway" application intended to be part of a microservice architecture.
 
-This is a "gateway" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.
-
-This application is configured for Service Discovery and Configuration with the JHipster-Registry. On launch, it will refuse to start if it is not able to connect to the JHipster-Registry at [http://localhost:8761](http://localhost:8761). For more information, read our documentation on [Service Discovery and Configuration with the JHipster-Registry][].
+This application is configured for Service Discovery and Configuration with the ECOS-Registry. On launch, it will refuse to start if it is not able to connect to the ECOS-Registry at [http://localhost:8761](http://localhost:8761).
 
 ## Development
 
@@ -63,8 +61,6 @@ To benefit from TypeScript type definitions from [DefinitelyTyped][] repository 
 Then you would import the JS and CSS files specified in library's installation instructions so that [Webpack][] knows about them:
 Note: there are still few other things remaining to do for Leaflet that we won't detail here.
 
-For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
-
 ## Building for production
 
 To optimize the gateway application for production, run:
@@ -77,8 +73,6 @@ To ensure everything worked, run:
     java -jar target/*.war
 
 Then navigate to [http://localhost:8085](http://localhost:8085) in your browser.
-
-Refer to [Using JHipster in production][] for more details.
 
 ## Testing
 
@@ -112,7 +106,7 @@ For more information, refer to the [Code quality page][].
 
 ## Using Docker to simplify development (optional)
 
-You can use Docker to improve your JHipster development experience. A number of docker-compose configuration are available in the [src/main/docker](src/main/docker) folder to launch required third party services.
+You can use Docker to improve your ECOS-Registry development experience. A number of docker-compose configuration are available in the [src/main/docker](src/main/docker) folder to launch required third party services.
 
 For example, to start a postgresql database in a docker container, run:
 
@@ -131,22 +125,6 @@ Then run:
 
     docker-compose -f src/main/docker/app.yml up -d
 
-For more information refer to [Using Docker and Docker-Compose][], this page also contains information on the docker-compose sub-generator (`jhipster docker-compose`), which is able to generate docker configurations for one or several JHipster applications.
-
-## Continuous Integration (optional)
-
-To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`), this will let you generate configuration files for a number of Continuous Integration systems. Consult the [Setting up Continuous Integration][] page for more information.
-
-[jhipster homepage and latest documentation]: https://www.jhipster.tech
-[jhipster 5.8.1 archive]: https://www.jhipster.tech/documentation-archive/v5.8.1
-[doing microservices with jhipster]: https://www.jhipster.tech/documentation-archive/v5.8.1/microservices-architecture/
-[using jhipster in development]: https://www.jhipster.tech/documentation-archive/v5.8.1/development/
-[service discovery and configuration with the jhipster-registry]: https://www.jhipster.tech/documentation-archive/v5.8.1/microservices-architecture/#jhipster-registry
-[using docker and docker-compose]: https://www.jhipster.tech/documentation-archive/v5.8.1/docker-compose
-[using jhipster in production]: https://www.jhipster.tech/documentation-archive/v5.8.1/production/
-[running tests page]: https://www.jhipster.tech/documentation-archive/v5.8.1/running-tests/
-[code quality page]: https://www.jhipster.tech/documentation-archive/v5.8.1/code-quality/
-[setting up continuous integration]: https://www.jhipster.tech/documentation-archive/v5.8.1/setting-up-ci/
 [node.js]: https://nodejs.org/
 [yarn]: https://yarnpkg.org/
 [webpack]: https://webpack.github.io/
@@ -157,4 +135,5 @@ To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`)
 [protractor]: https://angular.github.io/protractor/
 [leaflet]: http://leafletjs.com/
 [definitelytyped]: http://definitelytyped.org/
+
 ##test

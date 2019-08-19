@@ -27,8 +27,8 @@ public class GatewayConfiguration {
     public static class AccessControlFilterConfiguration {
 
         @Bean
-        public AccessControlFilter accessControlFilter(RouteLocator routeLocator, JHipsterProperties jHipsterProperties){
-            return new AccessControlFilter(routeLocator, jHipsterProperties);
+        public AccessControlFilter accessControlFilter(RouteLocator routeLocator, JHipsterProperties ecosRegistryProperties){
+            return new AccessControlFilter(routeLocator, ecosRegistryProperties);
         }
     }
 
@@ -41,15 +41,15 @@ public class GatewayConfiguration {
     @ConditionalOnProperty("jhipster.gateway.rate-limiting.enabled")
     public static class RateLimitingConfiguration {
 
-        private final JHipsterProperties jHipsterProperties;
+        private final JHipsterProperties ecosRegistryProperties;
 
-        public RateLimitingConfiguration(JHipsterProperties jHipsterProperties) {
-            this.jHipsterProperties = jHipsterProperties;
+        public RateLimitingConfiguration(JHipsterProperties ecosRegistryProperties) {
+            this.ecosRegistryProperties = ecosRegistryProperties;
         }
 
         @Bean
         public RateLimitingFilter rateLimitingFilter() {
-            return new RateLimitingFilter(jHipsterProperties);
+            return new RateLimitingFilter(ecosRegistryProperties);
         }
     }
 }

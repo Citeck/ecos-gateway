@@ -25,7 +25,7 @@ const adminMenuItems = (
         <DropdownItem tag={Link} to="/admin/audits">
             <FontAwesomeIcon icon="bell" fixedWidth /> <Translate contentKey="global.menu.admin.audits">Audits</Translate>
         </DropdownItem>
-        {/* jhipster-needle-add-element-to-admin-menu - JHipster will add entities to the admin menu here */}
+        {/* jhipster-needle-add-element-to-admin-menu - ECOS-Registry will add entities to the admin menu here */}
         <DropdownItem tag={Link} to="/admin/logs">
             <FontAwesomeIcon icon="tasks" fixedWidth /> <Translate contentKey="global.menu.admin.logs">Logs</Translate>
         </DropdownItem>
