@@ -26,7 +26,7 @@ timestamps {
       }
       stage('Psuh docker image') {
         docker.withRegistry('http://127.0.0.1:8082', '7d800357-2193-4474-b768-5c27b97a1030') {
-          def microserviceImage = "ecos-uiserv"+":"+"${project_version}"
+          def microserviceImage = "ecos-gateway"+":"+"${project_version}"
           def current_microserviceImage = docker.image("${microserviceImage}")
           current_microserviceImage.push()
         }
