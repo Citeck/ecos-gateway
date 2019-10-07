@@ -151,7 +151,7 @@ public class RecordsConfig extends RecordsServiceFactory {
     public RestTemplate microservicesRestTemplate() {
         return restTemplateBuilder
             .requestFactory(SkipSslVerificationHttpRequestFactory.class)
-            .additionalInterceptors(languageRelayingInterceptor)
+            .additionalInterceptors(languageRelayingInterceptor, cookiesRelayingInterceptor)
             .rootUri("http://gateway")
             .build();
     }
@@ -160,7 +160,7 @@ public class RecordsConfig extends RecordsServiceFactory {
     private static class SkipSslVerificationHttpRequestFactory extends SimpleClientHttpRequestFactory {
         @Override
         protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
-            if(connection instanceof HttpsURLConnection) {
+            if (connection instanceof HttpsURLConnection) {
                 try {
                     ((HttpsURLConnection) connection).setHostnameVerifier(
                         (String s, SSLSession sslSession) -> true);

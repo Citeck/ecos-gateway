@@ -18,6 +18,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.filter.CorsFilter;
 
 import javax.servlet.*;
@@ -169,4 +170,14 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
         H2ConfigurationHelper.initH2Console(servletContext);
     }
 
+    @Bean
+    public CommonsRequestLoggingFilter logFilter() {
+        CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
+        filter.setIncludeQueryString(true);
+        filter.setIncludePayload(true);
+        filter.setIncludeHeaders(true);
+        filter.setMaxPayloadLength(10000);
+        filter.setAfterMessagePrefix("REQUEST DATA : ");
+        return filter;
+    }
 }

@@ -5,7 +5,7 @@ timestamps {
       stage('Checkout SCM') {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: 'master']],
+          branches: [[name: "${env.BRANCH_NAME}"]],
           doGenerateSubmoduleConfigurations: false,
           extensions: [],
           submoduleCfg: [],

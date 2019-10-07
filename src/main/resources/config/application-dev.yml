@@ -43,7 +43,7 @@ spring:
             indent-output: true
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:postgresql://localhost:5432/gateway
+        url: jdbc:postgresql://localhost:5430/gateway
         username: gateway
         password:
         hikari:
@@ -149,10 +149,3 @@ jhipster:
 # More documentation is available at:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
-
-# application:
-alfresco:
-    ribbon:
-        #If you do not specify a class, listOfServers is ignored if eureka is present.
-        NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
-        listOfServers: localhost:8080
