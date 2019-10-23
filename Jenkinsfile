@@ -20,7 +20,7 @@ timestamps {
       }
       stage('Build project artifacts') {
         withMaven(mavenLocalRepo: '/opt/jenkins/.m2/repository', tempBinDir: '') {
-          sh "mvn clean package -Dskip.npm -P!webpack -Djib.docker.image.tag=${project_version} jib:dockerBuild"
+          sh "mvn clean package -Dskip.npm -Pprod -P!webpack -Djib.docker.image.tag=${project_version} jib:dockerBuild"
         }
         junit '**/target/surefire-reports/*.xml'
       }
