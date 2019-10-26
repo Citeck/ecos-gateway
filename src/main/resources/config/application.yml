@@ -59,6 +59,8 @@ zuul: # those values must be configured depending on the application specific ne
             sensitiveHeaders: #relay headers
         eapps:
             sensitiveHeaders: #relay headers
+        history:
+            sensitiveHeaders: #relay headers
 
 # See https://github.com/Netflix/Hystrix/wiki/Configuration
 hystrix:
@@ -67,7 +69,7 @@ hystrix:
             execution:
                 isolation:
                     thread:
-                        timeoutInMilliseconds: 122000
+                        timeoutInMilliseconds: 130000
 
 management:
     endpoints:
@@ -188,3 +190,14 @@ jhipster:
 # ===================================================================
 
 # application:
+
+ecos-gateway:
+    ecos-records:
+        gateway-mode: true
+        default-app: alfresco
+        source-id-mapping:
+            "[uiserv/eform]": alfresco/eform
+        apps:
+            alfresco:
+                rec-base-url: /alfresco/s/citeck/ecos/records/
+                rec-user-base-url: /share/proxy/alfresco/citeck/ecos/records/
