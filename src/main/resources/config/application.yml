@@ -195,7 +195,3 @@ ecos-gateway:
     ecos-records:
         gateway-mode: true
         default-app: alfresco
-        apps:
-            alfresco:
-                rec-base-url: /alfresco/s/citeck/ecos/records/
-                rec-user-base-url: /share/proxy/alfresco/citeck/ecos/records/
