@@ -195,8 +195,6 @@ ecos-gateway:
     ecos-records:
         gateway-mode: true
         default-app: alfresco
-        source-id-mapping:
-            "[uiserv/eform]": alfresco/eform
         apps:
             alfresco:
                 rec-base-url: /alfresco/s/citeck/ecos/records/
