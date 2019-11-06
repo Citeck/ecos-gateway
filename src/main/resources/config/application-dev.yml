@@ -21,7 +21,7 @@ eureka:
         prefer-ip-address: true
     client:
         service-url:
-            defaultZone: http://admin:${ecos.registry.password}@localhost:8761/eureka/
+            defaultZone: http://admin:${ecos.registry.password:${jhipster.registry.password:}}@localhost:8761/eureka/
 
 spring:
     profiles:

@@ -548,7 +548,8 @@
                           </ports>
                           <environment>
                               <SPRING_OUTPUT_ANSI_ENABLED>ALWAYS</SPRING_OUTPUT_ANSI_ENABLED>
-                              <ECOS_REGISTRY_SLEEP>0</ECOS_REGISTRY_SLEEP>
+                              <JHIPSTER_SLEEP>0</JHIPSTER_SLEEP>
+                              <ECOS_INIT_DELAY>0</ECOS_INIT_DELAY>
                           </environment>
                           <useCurrentTimestamp>true</useCurrentTimestamp>
                       </container>

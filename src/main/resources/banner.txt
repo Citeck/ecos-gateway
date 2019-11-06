@@ -1,2 +1,2 @@
 
-:: Running Spring Boot ${spring-boot.version} ::
+:: STARTING ${AnsiColor.MAGENTA}ECOS-GATEWAY${AnsiColor.DEFAULT} ::
