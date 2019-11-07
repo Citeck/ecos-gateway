@@ -43,9 +43,7 @@
         <profile.tls />
 
         <!-- Dependency versions -->
-        <jhipster-dependencies.version>2.1.1</jhipster-dependencies.version>
-        <!-- The spring-boot version should match the one managed by
-        https://mvnrepository.com/artifact/io.github.jhipster/jhipster-dependencies/${jhipster-dependencies.version} -->
+        <ecos-registry-dependencies.version>2.1.1</ecos-registry-dependencies.version>
         <spring-boot.version>2.0.8.RELEASE</spring-boot.version>
         <!-- The hibernate version should match the one managed by
         https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/${spring-boot.version} -->
@@ -111,7 +109,7 @@
             <dependency>
                 <groupId>io.github.jhipster</groupId>
                 <artifactId>jhipster-dependencies</artifactId>
-                <version>${jhipster-dependencies.version}</version>
+                <version>${ecos-registry-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -551,6 +549,7 @@
                           <environment>
                               <SPRING_OUTPUT_ANSI_ENABLED>ALWAYS</SPRING_OUTPUT_ANSI_ENABLED>
                               <JHIPSTER_SLEEP>0</JHIPSTER_SLEEP>
+                              <ECOS_INIT_DELAY>0</ECOS_INIT_DELAY>
                           </environment>
                           <useCurrentTimestamp>true</useCurrentTimestamp>
                       </container>
@@ -623,12 +622,11 @@
                     <configuration>
                         <rules>
                             <requireMavenVersion>
-                                <message>You are running an older version of Maven. JHipster requires at least Maven ${maven.version}</message>
+                                <message>You are running an older version of Maven. ECOS-Registry requires at least Maven ${maven.version}</message>
                                 <version>[${maven.version},)</version>
                             </requireMavenVersion>
                             <requireJavaVersion>
-                                <!-- Until JHipster supports JDK 9 -->
-                                <message>You are running an incompatible version of Java. JHipster requires JDK ${java.version}</message>
+                                <message>You are running an incompatible version of Java. ECOS-Registry requires JDK ${java.version}</message>
                                 <version>[1.8,1.9)</version>
                             </requireJavaVersion>
                         </rules>

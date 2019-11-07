@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="manifest" href="manifest.webapp" />
     <link rel="stylesheet" href="static/css/loading.css">
-    <!-- jhipster-needle-add-resources-to-root - JHipster will add new resources here -->
+    <!-- jhipster-needle-add-resources-to-root - ECOS-Registry will add new resources here -->
 </head>
 <body>
     <!--[if lt IE 9]>
@@ -28,14 +28,14 @@
             </div>
         </div>
         <div class="app-loading">
-            <div id="jhipster-error" style="display:none">
+            <div id="ecos-registry-error" style="display:none">
                 <!-- This content is for troubleshooting purpose and will be removed when app renders -->
                 <h1>An error has occurred :-(</h1>
                 <h2>Usual error causes</h2>
                 <ol>
                     <li>You started the application from an IDE and you didn't run <code style="color:red">npm start</code> or <code style="color:red">npm run webpack:build</code>.</li>
-                    <li>You had a network error while running <code style="color:red">npm install</code>. If you are behind a corporate proxy, it is likely that this error was caused by your proxy. Have a look at the JHipster error logs, you will probably have the cause of the error.</li>
-                    <li>You installed a Node.js version that doesn't work with JHipster: please use an LTS (long-term support) version, as it's the only version we support.</li>
+                    <li>You had a network error while running <code style="color:red">npm install</code>. If you are behind a corporate proxy, it is likely that this error was caused by your proxy. Have a look at the ECOS-Registry error logs, you will probably have the cause of the error.</li>
+                    <li>You installed a Node.js version that doesn't work with ECOS-Registry: please use an LTS (long-term support) version, as it's the only version we support.</li>
                 </ol>
                 <h2>Building the client side code again</h2>
                 <p>If you want to go fast, run <code style="color:red">./mvnw</code> to build and run everything.</p>
@@ -46,26 +46,6 @@
                     <li>Start the server with <code style="color:red">./mvnw</code> or using your IDE</li>
                 </ol>
 
-                <h2>Getting more help</h2>
-
-                <h3>If you have a question on how to use JHipster</h3>
-                <p>
-                    Go to Stack Overflow with the <a href="http://stackoverflow.com/tags/jhipster" target="_blank">"jhipster"</a> tag.
-                </p>
-
-                <h3>If you have a bug or a feature request</h3>
-                <p>
-                    First read our <a href="https://github.com/jhipster/generator-jhipster/blob/master/CONTRIBUTING.md" target="_blank">contributing guidelines</a>.
-                </p>
-                <p>
-                    Then, fill a ticket on our <a href="https://github.com/jhipster/generator-jhipster/issues/new/choose" target="_blank">bug tracker</a>, we'll be happy to resolve your issue!
-                </p>
-
-                <h3>If you want to chat with contributors and other users</h3>
-                <p>
-                    Join our chat room on <a href="https://gitter.im/jhipster/generator-jhipster" target="_blank">Gitter.im</a>. Please note that this is a public chat room, and that we expect you to respect other people and write in a correct English language!
-                </p>
-                <!-- end of troubleshooting content -->
             </div>
         </div>
     </div>
@@ -77,7 +57,7 @@
             setTimeout(showError, 4000);
         }
         function showError() {
-            var errorElm = document.getElementById("jhipster-error");
+            var errorElm = document.getElementById("ecos-registry-error");
             if (errorElm && errorElm.style) {
                 errorElm.style.display = "block";
             }

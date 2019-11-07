@@ -42,19 +42,19 @@ public class LoggingConfiguration {
 
     private final String version;
 
-    private final JHipsterProperties jHipsterProperties;
+    private final JHipsterProperties ecosRegistryProperties;
 
     public LoggingConfiguration(@Value("${spring.application.name}") String appName, @Value("${server.port}") String serverPort,
-         @Value("${info.project.version:}") String version, JHipsterProperties jHipsterProperties) {
+         @Value("${info.project.version:}") String version, JHipsterProperties ecosRegistryProperties) {
         this.appName = appName;
         this.serverPort = serverPort;
         this.version = version;
-        this.jHipsterProperties = jHipsterProperties;
-        if (jHipsterProperties.getLogging().getLogstash().isEnabled()) {
+        this.ecosRegistryProperties = ecosRegistryProperties;
+        if (ecosRegistryProperties.getLogging().getLogstash().isEnabled()) {
             addLogstashAppender(context);
             addContextListener(context);
         }
-        if (jHipsterProperties.getMetrics().getLogs().isEnabled()) {
+        if (ecosRegistryProperties.getMetrics().getLogs().isEnabled()) {
             setMetricsMarkerLogbackFilter(context);
         }
     }
@@ -77,8 +77,8 @@ public class LoggingConfiguration {
 
         // More documentation is available at: https://github.com/logstash/logstash-logback-encoder
         LogstashEncoder logstashEncoder = new LogstashEncoder();
-        // Set the Logstash appender config from JHipster properties
-        logstashAppender.addDestinations(new InetSocketAddress(jHipsterProperties.getLogging().getLogstash().getHost(), jHipsterProperties.getLogging().getLogstash().getPort()));
+        // Set the Logstash appender config from ECOS-Registry properties
+        logstashAppender.addDestinations(new InetSocketAddress(ecosRegistryProperties.getLogging().getLogstash().getHost(), ecosRegistryProperties.getLogging().getLogstash().getPort()));
 
         ShortenedThrowableConverter throwableConverter = new ShortenedThrowableConverter();
         throwableConverter.setRootCauseFirst(true);
@@ -92,7 +92,7 @@ public class LoggingConfiguration {
         AsyncAppender asyncLogstashAppender = new AsyncAppender();
         asyncLogstashAppender.setContext(context);
         asyncLogstashAppender.setName(ASYNC_LOGSTASH_APPENDER_NAME);
-        asyncLogstashAppender.setQueueSize(jHipsterProperties.getLogging().getLogstash().getQueueSize());
+        asyncLogstashAppender.setQueueSize(ecosRegistryProperties.getLogging().getLogstash().getQueueSize());
         asyncLogstashAppender.addAppender(logstashAppender);
         asyncLogstashAppender.start();
 
