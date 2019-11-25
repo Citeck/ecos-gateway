@@ -2,12 +2,10 @@ package ru.citeck.ecos.config;
 
 import io.github.jhipster.config.JHipsterConstants;
 import io.github.jhipster.config.JHipsterProperties;
-import io.github.jhipster.config.h2.H2ConfigurationHelper;
 import io.github.jhipster.web.filter.CachingHttpHeadersFilter;
 import io.undertow.UndertowOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
 import org.springframework.boot.web.server.*;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
@@ -56,9 +54,6 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
         EnumSet<DispatcherType> disps = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
         if (env.acceptsProfiles(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
             initCachingHttpHeadersFilter(servletContext, disps);
-        }
-        if (env.acceptsProfiles(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)) {
-            initH2Console(servletContext);
         }
         log.info("Web application fully configured");
     }
@@ -160,14 +155,6 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
             source.registerCorsConfiguration("/*/management/**", config);
         }
         return new CorsFilter(source);
-    }
-
-    /**
-     * Initializes H2 console.
-     */
-    private void initH2Console(ServletContext servletContext) {
-        log.debug("Initialize H2 console");
-        H2ConfigurationHelper.initH2Console(servletContext);
     }
 
     @Bean
