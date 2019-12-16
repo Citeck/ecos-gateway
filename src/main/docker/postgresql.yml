@@ -3,7 +3,7 @@ services:
     gateway-postgresql:
         image: postgres:10.4
         # volumes:
-        #     - ~/volumes/jhipster/gateway/postgresql/:/var/lib/postgresql/data/
+        #     - ~/volumes/ecos/gateway/postgresql/:/var/lib/postgresql/data/
         environment:
             - POSTGRES_USER=gateway
             - POSTGRES_PASSWORD=

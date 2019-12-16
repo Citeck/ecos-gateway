@@ -24,10 +24,10 @@ public class AsyncConfiguration implements AsyncConfigurer, SchedulingConfigurer
 
     private final Logger log = LoggerFactory.getLogger(AsyncConfiguration.class);
 
-    private final JHipsterProperties jHipsterProperties;
+    private final JHipsterProperties ecosRegistryProperties;
 
-    public AsyncConfiguration(JHipsterProperties jHipsterProperties) {
-        this.jHipsterProperties = jHipsterProperties;
+    public AsyncConfiguration(JHipsterProperties ecosRegistryProperties) {
+        this.ecosRegistryProperties = ecosRegistryProperties;
     }
 
     @Override
@@ -35,9 +35,9 @@ public class AsyncConfiguration implements AsyncConfigurer, SchedulingConfigurer
     public Executor getAsyncExecutor() {
         log.debug("Creating Async Task Executor");
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(jHipsterProperties.getAsync().getCorePoolSize());
-        executor.setMaxPoolSize(jHipsterProperties.getAsync().getMaxPoolSize());
-        executor.setQueueCapacity(jHipsterProperties.getAsync().getQueueCapacity());
+        executor.setCorePoolSize(ecosRegistryProperties.getAsync().getCorePoolSize());
+        executor.setMaxPoolSize(ecosRegistryProperties.getAsync().getMaxPoolSize());
+        executor.setQueueCapacity(ecosRegistryProperties.getAsync().getQueueCapacity());
         executor.setThreadNamePrefix("gateway-Executor-");
         return new ExceptionHandlingAsyncTaskExecutor(executor);
     }
@@ -54,6 +54,6 @@ public class AsyncConfiguration implements AsyncConfigurer, SchedulingConfigurer
 
     @Bean
     public Executor scheduledTaskExecutor() {
-        return Executors.newScheduledThreadPool(jHipsterProperties.getAsync().getCorePoolSize());
+        return Executors.newScheduledThreadPool(ecosRegistryProperties.getAsync().getCorePoolSize());
     }
 }
