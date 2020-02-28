@@ -24,12 +24,12 @@ public class RecordsShareRestApi {
         return restApi.recordsQuery(body);
     }
 
-    @PostMapping("/mutate", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/mutate", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public Object recordsMutate(@RequestBody byte[] body) {
         return restApi.recordsMutate(body);
     }
 
-    @PostMapping("/delete", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public Object recordsDelete(@RequestBody byte[] body) {
         return restApi.recordsDelete(body);
     }
