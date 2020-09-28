@@ -1,3 +1,4 @@
+#test
 properties([
     buildDiscarder(logRotator(daysToKeepStr: '3', numToKeepStr: '3')),
 ])
