@@ -6,13 +6,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.citeck.ecos.records2.spring.web.rest.RecordsRestApi;
+import ru.citeck.ecos.records3.spring.web.rest.RecordsRestApi;
 
 @RestController
 @RequestMapping("/share/api/records")
 public class RecordsShareRestApi {
 
-    private RecordsRestApi restApi;
+    private final RecordsRestApi restApi;
 
     @Autowired
     public RecordsShareRestApi(RecordsRestApi restApi) {

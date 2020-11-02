@@ -2,6 +2,7 @@ package ru.citeck.ecos.config;
 
 import io.github.jhipster.config.JHipsterProperties;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import ru.citeck.ecos.gateway.ratelimiting.RateLimitingFilter;
 import ru.citeck.ecos.gateway.accesscontrol.AccessControlFilter;
 import ru.citeck.ecos.gateway.responserewriting.SwaggerBasePathRewritingFilter;
@@ -10,9 +11,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.netflix.zuul.filters.RouteLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.citeck.ecos.records2.RecordsProperties;
 
 @Configuration
 public class GatewayConfiguration {
+
+    @Bean
+    @ConfigurationProperties(prefix = "ecos-gateway.ecos-records")
+    public RecordsProperties recordsProperties() {
+        return new RecordsProperties();
+    }
 
     @Configuration
     public static class SwaggerBasePathRewritingConfiguration {
