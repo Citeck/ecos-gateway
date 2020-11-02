@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.netflix.zuul.filters.RouteLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.citeck.ecos.records2.RecordsProperties;
+import ru.citeck.ecos.records3.RecordsProperties;
 
 @Configuration
 public class GatewayConfiguration {
