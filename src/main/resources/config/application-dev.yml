@@ -38,14 +38,6 @@ spring:
     jackson:
         serialization:
             indent-output: true
-    datasource:
-        type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:postgresql://localhost:5430/gateway
-        username: gateway
-        password:
-        hikari:
-            poolName: Hikari
-            auto-commit: false
     jpa:
         database-platform: io.github.jhipster.domain.util.FixedPostgreSQL82Dialect
         database: POSTGRESQL
