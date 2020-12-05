@@ -118,6 +118,8 @@ management:
 spring:
     application:
         name: gateway
+    liquibase:
+        enabled: false
     jpa:
         open-in-view: false
         properties:
