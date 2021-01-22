@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.app.application.init.buildinfo
+package ru.citeck.ecos.app.application.init.buildinfo
 
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
