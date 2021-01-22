@@ -299,21 +299,6 @@
             <artifactId>metrics-core</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ru.citeck.ecos.rabbitmq</groupId>
-            <artifactId>ecos-rabbitmq-spring</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ru.citeck.ecos</groupId>
-            <artifactId>ecos-commands-spring</artifactId>
-        </dependency>
-
         <!-- jhipster-needle-maven-add-dependency -->
 
     </dependencies>
