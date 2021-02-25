@@ -33,13 +33,13 @@ class AlfUserJwtFilter(
     }
 
     private val authoritiesCache = CacheBuilder.newBuilder()
-        .expireAfterWrite(30L, TimeUnit.SECONDS)
+        .expireAfterWrite(30, TimeUnit.SECONDS)
         .maximumSize(200)
         .build(CacheLoader.from<String, List<String>> { evalUserAuthorities(it) })
 
     private val tokensCache = CacheBuilder.newBuilder()
-        .expireAfterWrite(1, TimeUnit.HOURS)
-        .maximumSize(500)
+        .expireAfterWrite(30, TimeUnit.SECONDS)
+        .maximumSize(400)
         .build(CacheLoader.from<Authentication, String> { evalJwtToken(it) })
 
     @PostConstruct
