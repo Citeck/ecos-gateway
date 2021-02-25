@@ -100,6 +100,9 @@ class AlfUserJwtFilter(
 
     private fun evalUserAuthorities(userName: String?) : List<String> {
         userName ?: error("userName can't be null")
+        if (userName == "guest") {
+            return listOf(AuthoritiesConstants.GUEST)
+        }
         if (userName == "system") {
             return listOf(userName, AuthoritiesConstants.ADMIN)
         }
@@ -114,6 +117,7 @@ class AlfUserJwtFilter(
         if (authorities.contains(ADMIN_AUTHORITY)) {
             authorities.add(AuthoritiesConstants.ADMIN)
         }
+        authorities.add(AuthoritiesConstants.USER)
         return authorities
     }
 
