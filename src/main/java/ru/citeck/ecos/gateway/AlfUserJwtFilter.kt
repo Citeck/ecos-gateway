@@ -103,8 +103,8 @@ class AlfUserJwtFilter(
         if (userName == "guest") {
             return listOf(AuthoritiesConstants.GUEST)
         }
-        if (userName == "system") {
-            return listOf(userName, AuthoritiesConstants.ADMIN)
+        if (userName == AuthoritiesConstants.SYSTEM_USER) {
+            return listOf(AuthoritiesConstants.SYSTEM_USER)
         }
         val userRef = RecordRef.create("alfresco", "people", userName)
         val userInfo = RemoteRecordsUtils.runAsSystem {
