@@ -182,6 +182,8 @@ ecos-gateway:
   ecos-records:
     gateway-mode: true
     default-app: alfresco
+    source-id-mapping:
+      uiserv/eform: uiserv/form
 
 spring.rabbitmq:
   host: rabbitmq
