@@ -35,7 +35,7 @@ class AlfUserJwtFilter(
     private val authoritiesCache = CacheBuilder.newBuilder()
         .expireAfterWrite(30, TimeUnit.SECONDS)
         .maximumSize(200)
-        .build(CacheLoader.from<String, List<String>> { evalUserAuthorities(it) })
+        .build(CacheLoader.from<String, UserAuthInfo> { evalUserAuthorities(it) })
 
     private val tokensCache = CacheBuilder.newBuilder()
         .expireAfterWrite(30, TimeUnit.SECONDS)
@@ -67,7 +67,12 @@ class AlfUserJwtFilter(
 
     override fun getAuthHeader(userName: String): String? {
 
-        val authorities = authoritiesCache.getUnchecked(userName).map { SimpleGrantedAuthority(it) }
+        val authInfo = authoritiesCache.getUnchecked(userName);
+        if (authInfo.isDisabled) {
+            throw UserDisabledException("User is disabled")
+        }
+
+        val authorities = authInfo.authorities.map { SimpleGrantedAuthority(it) }
         val authentication = UsernamePasswordAuthenticationToken(userName, null, authorities)
 
         var token = tokensCache.getUnchecked(authentication)
@@ -98,31 +103,37 @@ class AlfUserJwtFilter(
         return tokenProvider.createToken(authentication, false)
     }
 
-    private fun evalUserAuthorities(userName: String?) : List<String> {
+    private fun evalUserAuthorities(userName: String?) : UserAuthInfo {
         userName ?: error("userName can't be null")
         if (userName == "guest") {
-            return listOf(AuthoritiesConstants.GUEST)
+            return UserAuthInfo(listOf(AuthoritiesConstants.GUEST))
         }
         if (userName == AuthoritiesConstants.SYSTEM_USER) {
-            return listOf(AuthoritiesConstants.SYSTEM_USER)
+            return UserAuthInfo(listOf(AuthoritiesConstants.SYSTEM_USER))
         }
         val userRef = RecordRef.create("alfresco", "people", userName)
-        val userInfo = RemoteRecordsUtils.runAsSystem {
-            recordsService.getAtts(userRef, UserAuthorities::class.java)
+        val userAtts = RemoteRecordsUtils.runAsSystem {
+            recordsService.getAtts(userRef, UserAuthAtts::class.java)
         }
-        if (userInfo.authorities == null) {
+        if (userAtts.authorities == null) {
             error("User authorities is null. User: $userName")
         }
-        val authorities = ArrayList(userInfo.authorities)
+        val authorities = ArrayList(userAtts.authorities)
         if (authorities.contains(ADMIN_AUTHORITY)) {
             authorities.add(AuthoritiesConstants.ADMIN)
         }
         authorities.add(AuthoritiesConstants.USER)
-        return authorities
+        return UserAuthInfo(authorities, userAtts.isDisabled == true)
     }
 
-    class UserAuthorities(
+    data class UserAuthInfo(
+        val authorities: List<String>,
+        val isDisabled: Boolean = false
+    )
+
+    class UserAuthAtts(
         @AttName("authorities.list[]?str")
-        val authorities: List<String>? = null
+        val authorities: List<String>? = null,
+        val isDisabled: Boolean?
     )
 }
