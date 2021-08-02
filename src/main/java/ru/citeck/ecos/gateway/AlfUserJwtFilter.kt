@@ -13,8 +13,8 @@ import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.rest.RemoteRecordsUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
-import ru.citeck.ecos.records3.spring.web.interceptor.AuthHeaderInterceptor
 import ru.citeck.ecos.records3.spring.web.interceptor.AuthHeaderProvider
+import ru.citeck.ecos.records3.spring.web.interceptor.RecordsAuthInterceptor
 import ru.citeck.ecos.security.AuthoritiesConstants
 import ru.citeck.ecos.security.jwt.JWTFilter
 import ru.citeck.ecos.security.jwt.TokenProvider
@@ -25,7 +25,7 @@ import javax.annotation.PostConstruct
 class AlfUserJwtFilter(
     private val tokenProvider: TokenProvider,
     private val recordsService: RecordsService,
-    private val authHeaderInterceptor: AuthHeaderInterceptor
+    private val authHeaderInterceptor: RecordsAuthInterceptor
 ) : ZuulFilter(), AuthHeaderProvider {
 
     companion object {
@@ -84,6 +84,10 @@ class AlfUserJwtFilter(
         }
 
         return "Bearer $token"
+    }
+
+    override fun getSystemAuthHeader(userName: String): String? {
+        return null
     }
 
     override fun shouldFilter(): Boolean {
