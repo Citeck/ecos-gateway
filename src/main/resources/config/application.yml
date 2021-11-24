@@ -60,6 +60,8 @@ zuul: # those values must be configured depending on the application specific ne
       sensitiveHeaders: #relay headers
     history:
       sensitiveHeaders: #relay headers
+    emodel:
+      sensitiveHeaders: #relay headers
 
 # See https://github.com/Netflix/Hystrix/wiki/Configuration
 hystrix:
