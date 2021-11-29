@@ -3,14 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ecos-gateway</artifactId>
-    <version>2.6.1</version>
-    <packaging>war</packaging>
+    <version>2.7.0</version>
     <name>Gateway</name>
 
     <parent>
         <groupId>ru.citeck.ecos</groupId>
         <artifactId>ecos-micro-base</artifactId>
-        <version>3.21.2</version>
+        <version>3.37.0</version>
     </parent>
 
     <repositories>
