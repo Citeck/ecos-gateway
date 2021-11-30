@@ -1,5 +1,5 @@
 properties([
-    buildDiscarder(logRotator(daysToKeepStr: '', numToKeepStr: '3')),
+    buildDiscarder(logRotator(daysToKeepStr: '3', numToKeepStr: '3')),
 ])
 timestamps {
   node {
@@ -14,7 +14,7 @@ timestamps {
           doGenerateSubmoduleConfigurations: false,
           extensions: [],
           submoduleCfg: [],
-          userRemoteConfigs: [[credentialsId: 'bc074014-bab1-4fb0-b5a4-4cfa9ded5e66', url: 'git@bitbucket.org:citeck/pipelines.git']]
+          userRemoteConfigs: [[credentialsId: 'awx.integrations', url: 'git@bitbucket.org:citeck/pipelines.git']]
         ])
       }
     }
@@ -29,15 +29,34 @@ timestamps {
           doGenerateSubmoduleConfigurations: false,
           extensions: [],
           submoduleCfg: [],
-          userRemoteConfigs: [[credentialsId: 'bc074014-bab1-4fb0-b5a4-4cfa9ded5e66', url: repoUrl]]
+          userRemoteConfigs: [[credentialsId: 'awx.integrations', url: repoUrl]]
         ])
       }
-      def project_version = readMavenPom().getVersion().toLowerCase()
-      if ((env.BRANCH_NAME != "master") && (!project_version.contains('snapshot')))  {
-        echo "Assembly of release artifacts is allowed only from the master branch!"
-        currentBuild.result = 'SUCCESS'
-        return
+
+      def project_version = readMavenPom().getVersion()
+      def lower_version = project_version.toLowerCase()
+
+      if (!(env.BRANCH_NAME ==~ /master(-\d)?/) && (!project_version.contains('SNAPSHOT'))) {
+        def tag = ""
+        try {
+          tag = sh(script: "git describe --exact-match --tags", returnStdout: true).trim()
+        } catch (Exception e) {
+          // no tag
+        }
+        def buildStopMsg = ""
+        if (tag == "") {
+          buildStopMsg = "You should add tag with version to build release from non-master branch. Version: " + project_version
+        } else if (tag != project_version) {
+          buildStopMsg = "Release tag doesn't match version. Tag: " + tag + " Version: " + project_version
+        }
+        if (buildStopMsg != "") {
+          echo buildStopMsg
+          buildTools.notifyBuildWarning(repoUrl, buildStopMsg, env)
+          currentBuild.result = 'NOT_BUILT'
+          return
+        }
       }
+
       buildTools.notifyBuildStarted(repoUrl, project_version, env)
       stage('Build project artifacts') {
         withMaven(mavenLocalRepo: '/opt/jenkins/.m2/repository', tempBinDir: '') {
@@ -48,13 +67,13 @@ timestamps {
               buildTools.writeBuildInfoToFiles(buildData)
           }
           // /build-info
-          sh "mvn jib:dockerBuild -Dskip.npm -Pprod,logToFile -Djib.docker.image.tag=${project_version}"
+          sh "mvn jib:dockerBuild -Dskip.npm -Pprod,logToFile -Djib.docker.image.tag=${lower_version}"
         }
         junit '**/target/surefire-reports/*.xml'
       }
       stage('Push docker image') {
         docker.withRegistry('http://127.0.0.1:8082', '7d800357-2193-4474-b768-5c27b97a1030') {
-          def microserviceImage = "ecos-gateway"+":"+"${project_version}"
+          def microserviceImage = "ecos-gateway"+":"+"${lower_version}"
           def current_microserviceImage = docker.image("${microserviceImage}")
           current_microserviceImage.push()
         }
