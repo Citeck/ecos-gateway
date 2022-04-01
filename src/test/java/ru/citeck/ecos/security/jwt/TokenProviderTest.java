@@ -1,7 +1,5 @@
 package ru.citeck.ecos.security.jwt;
 
-import ru.citeck.ecos.security.AuthoritiesConstants;
-
 import java.security.Key;
 import java.util.*;
 
@@ -19,6 +17,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import ru.citeck.ecos.context.lib.auth.AuthRole;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,7 +86,7 @@ public class TokenProviderTest {
 
     private Authentication createAuthentication() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.ANONYMOUS));
+        authorities.add(new SimpleGrantedAuthority(AuthRole.ANONYMOUS));
         return new UsernamePasswordAuthenticationToken("anonymous", "anonymous", authorities);
     }
 

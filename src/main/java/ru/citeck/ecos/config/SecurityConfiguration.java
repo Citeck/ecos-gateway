@@ -1,6 +1,6 @@
 package ru.citeck.ecos.config;
 
-import ru.citeck.ecos.security.*;
+import ru.citeck.ecos.context.lib.auth.AuthRole;
 import ru.citeck.ecos.security.jwt.*;
 
 import org.springframework.context.annotation.Configuration;
@@ -72,13 +72,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/**").permitAll()
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()
-            .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/management/**").hasAuthority(AuthRole.ADMIN)
         .and()
             .apply(securityConfigurerAdapter());
 
     }
 
     private JWTConfigurer securityConfigurerAdapter() {
-        return new JWTConfigurer(tokenProvider);
+        return new JWTConfigurer();
     }
 }

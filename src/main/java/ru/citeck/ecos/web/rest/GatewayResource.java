@@ -1,5 +1,6 @@
 package ru.citeck.ecos.web.rest;
 
+import ru.citeck.ecos.context.lib.auth.AuthRole;
 import ru.citeck.ecos.web.rest.vm.RouteVM;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import org.springframework.cloud.netflix.zuul.filters.Route;
 import org.springframework.cloud.netflix.zuul.filters.RouteLocator;
 import org.springframework.http.*;
 import org.springframework.security.access.annotation.Secured;
-import ru.citeck.ecos.security.AuthoritiesConstants;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -35,7 +35,7 @@ public class GatewayResource {
      * @return the ResponseEntity with status 200 (OK) and with body the list of routes
      */
     @GetMapping("/routes")
-    @Secured(AuthoritiesConstants.ADMIN)
+    @Secured(AuthRole.ADMIN)
     public ResponseEntity<List<RouteVM>> activeRoutes() {
         List<Route> routes = routeLocator.getRoutes();
         List<RouteVM> routeVMs = new ArrayList<>();

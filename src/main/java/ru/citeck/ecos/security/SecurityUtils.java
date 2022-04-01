@@ -3,6 +3,7 @@ package ru.citeck.ecos.security;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import ru.citeck.ecos.context.lib.auth.AuthRole;
 
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public final class SecurityUtils {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         return Optional.ofNullable(securityContext.getAuthentication())
             .map(authentication -> authentication.getAuthorities().stream()
-                .noneMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(AuthoritiesConstants.ANONYMOUS)))
+                .noneMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(AuthRole.ANONYMOUS)))
             .orElse(false);
     }
 
