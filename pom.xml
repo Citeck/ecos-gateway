@@ -9,7 +9,7 @@
     <parent>
         <groupId>ru.citeck.ecos</groupId>
         <artifactId>ecos-micro-base</artifactId>
-        <version>3.39.8</version>
+        <version>3.39.14</version>
     </parent>
 
     <repositories>
