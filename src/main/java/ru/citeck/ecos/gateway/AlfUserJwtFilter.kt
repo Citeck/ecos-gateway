@@ -68,7 +68,7 @@ class AlfUserJwtFilter(
     override fun getAuthHeader(userName: String): String? {
 
         val authInfo = authoritiesCache.getUnchecked(userName);
-        if (authInfo.isDisabled) {
+        if (userName != "admin" && authInfo.isDisabled) {
             throw UserDisabledException("User is disabled")
         }
 
