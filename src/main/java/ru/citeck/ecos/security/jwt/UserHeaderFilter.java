@@ -27,7 +27,7 @@ public class UserHeaderFilter extends GenericFilterBean {
 
         String userHeader = httpServletRequest.getHeader(GatewayHeader.ECOS_USER);
         if (StringUtils.isBlank(userHeader)) {
-            throw new RuntimeException("ECOS User is not found");
+            //throw new RuntimeException("ECOS User is not found");
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
