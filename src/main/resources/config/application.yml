@@ -57,6 +57,8 @@ zuul: # those values must be configured depending on the application specific ne
       sensitiveHeaders: #relay headers
     alfresco:
       sensitiveHeaders: #relay headers
+    alfshare:
+      sensitiveHeaders: #relay headers
     eapps:
       sensitiveHeaders: #relay headers
     history:
@@ -81,7 +83,7 @@ management:
         include: ["configprops", "env", "health", "info", "threaddump", "logfile", "jhi-metrics", "prometheus" ]
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: when_authorized
     jhi-metrics:
       enabled: true
   info:
