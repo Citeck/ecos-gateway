@@ -87,6 +87,9 @@ class AlfUserJwtFilter(
     }
 
     override fun getSystemAuthHeader(userName: String): String? {
+        if (userName == AuthoritiesConstants.SYSTEM_USER) {
+            return getAuthHeader(userName)
+        }
         return null
     }
 
@@ -113,7 +116,7 @@ class AlfUserJwtFilter(
             return UserAuthInfo(listOf(AuthoritiesConstants.GUEST))
         }
         if (userName == AuthoritiesConstants.SYSTEM_USER) {
-            return UserAuthInfo(listOf(AuthoritiesConstants.SYSTEM_USER))
+            return UserAuthInfo(listOf(AuthoritiesConstants.SYSTEM_USER, "ROLE_SYSTEM"))
         }
         val userRef = RecordRef.create("alfresco", "people", userName)
         val userAtts = RemoteRecordsUtils.runAsSystem {
