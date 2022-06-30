@@ -11,7 +11,7 @@ public class TokenRelayFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        RequestContext ctx = RequestContext.getCurrentContext();
+/*        RequestContext ctx = RequestContext.getCurrentContext();
         @SuppressWarnings("unchecked")
         Set<String> headers = (Set<String>) ctx.get("ignoredHeaders");
         //Если route not found, что для динамического discovery нормально,
@@ -19,13 +19,14 @@ public class TokenRelayFilter extends ZuulFilter {
         if (headers != null) {
             // JWT tokens should be relayed to the resource servers
             headers.remove("authorization");
-        }
+        }*/
         return null;
     }
 
     @Override
     public boolean shouldFilter() {
-        return true;
+        //return true;
+        return false;
     }
 
     @Override
