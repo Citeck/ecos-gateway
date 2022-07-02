@@ -7,9 +7,10 @@ import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.data.SimpleAuthData
 import ru.citeck.ecos.records2.RecordConstants
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
+import ru.citeck.ecos.webapp.api.constants.AppName
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.web.authenticator.Authentication
 import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticator
 import java.util.concurrent.TimeUnit
@@ -46,14 +47,22 @@ class UsernameAuthenticator(
                 error("User 'guest' does not exists and can't be created automatically")
             }
             if (config.createUserIfNotExists) {
-                log.info { "Create new user with username: '$header'" }
-                AuthContext.runAsSystem {
-                    recordsService.create("emodel/person", mapOf(
-                        "id" to header
-                    ))
+                synchronized(this) {
+                    authoritiesCache.invalidate(header)
+                    authInfo = authoritiesCache.getUnchecked(header)
+                    if (authInfo.notExists) {
+                        log.info { "Create new user with username: '$header'" }
+                        AuthContext.runAsSystem {
+                            recordsService.create(
+                                "${AppName.EMODEL}/person", mapOf(
+                                    "id" to header
+                                )
+                            )
+                        }
+                        authoritiesCache.invalidate(header)
+                        authInfo = authoritiesCache.getUnchecked(header)
+                    }
                 }
-                authoritiesCache.invalidate(header)
-                authInfo = authoritiesCache.getUnchecked(header)
             } else {
                 error("User '$header' does not exists and can't be created automatically")
             }
@@ -67,7 +76,7 @@ class UsernameAuthenticator(
         if (userName == AuthConstants.SYSTEM_USER) {
             error("System user can't use gateway")
         }
-        val userRef = RecordRef.create("emodel", "person", userName)
+        val userRef = EntityRef.create(AppName.EMODEL, "person", userName)
         val userAtts = AuthContext.runAsSystem {
             recordsService.getAtts(userRef, EmodelUserAuthAtts::class.java)
         }
