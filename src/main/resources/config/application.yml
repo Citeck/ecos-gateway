@@ -22,8 +22,6 @@ ecos:
     web:
       server:
         authenticator: username
-      client:
-        readTimeout: 5M
       authenticators:
         username:
           type: username
