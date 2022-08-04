@@ -4,17 +4,17 @@ import com.netflix.zuul.ZuulFilter
 import com.netflix.zuul.context.RequestContext
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
-import ru.citeck.ecos.webapp.lib.spring.context.web.authenticator.WebAuthenticatorsManager
 import ru.citeck.ecos.webapp.lib.web.authenticator.Authentication
 import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticator
-import ru.citeck.ecos.webapp.lib.web.client.EcosWebClientProperties
+import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticatorsManager
+import ru.citeck.ecos.webapp.lib.web.client.props.EcosWebClientProps
 import ru.citeck.ecos.webapp.lib.web.http.HttpHeaders
 import javax.annotation.PostConstruct
 
 @Component
 class EcosZuulFilter(
     private val authenticatorsManager: WebAuthenticatorsManager,
-    private val clientProps: EcosWebClientProperties
+    private val clientProps: EcosWebClientProps
 ) : ZuulFilter() {
 
     private var authenticator: WebAuthenticator? = null

@@ -3,8 +3,8 @@ package ru.citeck.ecos.gateway.authenticator.username
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import mu.KotlinLogging
-import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.context.lib.auth.data.SimpleAuthData
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
@@ -54,7 +54,8 @@ class UsernameAuthenticator(
                         log.info { "Create new user with username: '$header'" }
                         AuthContext.runAsSystem {
                             recordsService.create(
-                                "${AppName.EMODEL}/person", mapOf(
+                                "${AppName.EMODEL}/person",
+                                mapOf(
                                     "id" to header
                                 )
                             )
@@ -71,9 +72,9 @@ class UsernameAuthenticator(
         return Authentication(header, SimpleAuthData(header, authInfo.authorities))
     }
 
-    private fun evalUserAuthorities(userName: String?) : UserAuthInfo {
+    private fun evalUserAuthorities(userName: String?): UserAuthInfo {
         userName ?: error("userName can't be null")
-        if (userName == AuthConstants.SYSTEM_USER) {
+        if (userName == AuthUser.SYSTEM) {
             error("System user can't use gateway")
         }
         val userRef = EntityRef.create(AppName.EMODEL, "person", userName)
