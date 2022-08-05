@@ -1,2 +1,0 @@
-
-:: STARTING ${AnsiColor.MAGENTA}ECOS-GATEWAY${AnsiColor.DEFAULT} ::
