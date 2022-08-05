@@ -47,6 +47,10 @@ class UsernameAuthenticator(
                 error("User 'guest' does not exists and can't be created automatically")
             }
             if (config.createUserIfNotExists) {
+                if (header == "admin") {
+                    // admin will be created by patch in ecos-model
+                    error("User 'admin' is not created yet. Please try again later")
+                }
                 synchronized(this) {
                     authoritiesCache.invalidate(header)
                     authInfo = authoritiesCache.getUnchecked(header)
