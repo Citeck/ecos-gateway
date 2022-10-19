@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ecos-gateway</artifactId>
-    <version>2.10.1</version>
+    <version>2.10.2-SNAPSHOT</version>
     <name>Gateway</name>
 
     <parent>
