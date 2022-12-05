@@ -1,0 +1,12 @@
+---
+id: touch
+formRef: 'uiserv/form@touch-config-form'
+version: 1
+value:
+  enabled: true
+  uri: '/gateway/api/gateway/touch'
+type: JSON
+attributes:
+  - id: enabled
+    type: BOOLEAN
+  - id: uri
