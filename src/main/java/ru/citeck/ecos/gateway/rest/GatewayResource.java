@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.source.dao.local.meta.MetaRecordsDao;
 import ru.citeck.ecos.records3.RecordsService;
-import ru.citeck.ecos.webapp.api.apps.EcosWebAppsApi;
+import ru.citeck.ecos.webapp.api.apps.EcosRemoteWebAppsApi;
 import ru.citeck.ecos.webapp.api.constants.AppName;
 
 /**
@@ -31,7 +31,7 @@ public class GatewayResource {
 
     private final RouteLocator routeLocator;
     private final DiscoveryClient discoveryClient;
-    private final EcosWebAppsApi webAppsApi;
+    private final EcosRemoteWebAppsApi webAppsApi;
     private final RecordsService recordsService;
 
     /**
