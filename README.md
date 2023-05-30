@@ -1,99 +1,60 @@
-# ECOS - Gateway
+![Citeck ECOS Logo](https://raw.githubusercontent.com/Citeck/ecos-ui/develop/public/img/logo/ecos-logo.png)
 
-This is a "gateway" application intended to be part of a microservice architecture.
+# `ecos-gateway`
 
-This application is configured for Service Discovery and Configuration with the ECOS-Registry. On launch, it will refuse to start if it is not able to connect to the ECOS-Registry at [http://localhost:8761](http://localhost:8761).
+Welcome to the Citeck `ecos-gateway` repository! This repository contains gateway implementation for the Citeck ECOS platform. Citeck ECOS is a powerful and comprehensive enterprise content and operations system designed to streamline and automate business processes within organizations.
+
+## Get started
+
+If you are new to ECOS platform and would like to load the software locally, we recommend you download the Dockerized version from [Demo repository](https://github.com/Citeck/ecos-community-demo).
+
+## Useful Links
+
+- [Documentation](https://citeck-ecos.readthedocs.io/ru/latest/index.html) provides more in-depth information.
+
+## Dependencies
+
+This application requires the following applications from ECOS deployment to work:
+
+* zookeeper
+* rabbitmq
+* ecos-gateway
+* ecos-registry
 
 ## Development
 
-Before you can build this project, you must install and configure the following dependencies on your machine:
+To start your application in the dev profile, simply run:
 
-1.  [Node.js][]: We use Node to run a development web server and build the project.
-    Depending on your system, you can install Node either from source or as a pre-packaged bundle.
-
-After installing Node, you should be able to run the following command to install development tools.
-You will only need to run this command when dependencies change in [package.json](package.json).
-
-    npm install
-
-We use npm scripts and [Webpack][] as our build system.
-
-Run the following commands in two separate terminals to create a blissful development experience where your browser
-auto-refreshes when files change on your hard drive.
-
-    ./mvnw
-    npm start
-
-Npm is also used to manage CSS and JavaScript dependencies used in this application. You can upgrade dependencies by
-specifying a newer version in [package.json](package.json). You can also run `npm update` and `npm install` to manage dependencies.
-Add the `help` flag on any command to see how you can use it. For example, `npm help update`.
-
-The `npm run` command will list all of the scripts available to run for this project.
-
-### Service workers
-
-Service workers are commented by default, to enable them please uncomment the following code.
-
--   The service worker registering script in index.html
-
-```html
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker
-        .register('./service-worker.js')
-        .then(function() { console.log('Service Worker Registered'); });
-    }
-</script>
+```
+./mvnw spring-boot:run
 ```
 
-Note: workbox creates the respective service worker and dynamically generate the `service-worker.js`
+If your IDE supports starting Spring Boot applications directly, then you can easily run the class 'ru.citeck.ecos.GatewayApp' without additional setup.
 
-### Managing dependencies
+### Building for production
 
-For example, to add [Leaflet][] library as a runtime dependency of your application, you would run following command:
+To build the application for production, run:
 
-    npm install --save --save-exact leaflet
+```
+./mvnw -Pprod clean package jib:dockerBuild -Djib.docker.image.tag=custom 
+```
 
-To benefit from TypeScript type definitions from [DefinitelyTyped][] repository in development, you would run following command:
+To ensure everything worked, stop original ecos-gateway container and start ecos-gateway:custom instead of it.
 
-    npm install --save-dev --save-exact @types/leaflet
-
-Then you would import the JS and CSS files specified in library's installation instructions so that [Webpack][] knows about them:
-Note: there are still few other things remaining to do for Leaflet that we won't detail here.
-
-## Building for production
-
-To optimize the gateway application for production, run:
-
-    ./mvnw -Pprod clean package
-
-This will concatenate and minify the client CSS and JavaScript files. It will also modify `index.html` so it references these new files.
-To ensure everything worked, run:
-
-    java -jar target/*.war
-
-Then navigate to [http://localhost:8085](http://localhost:8085) in your browser.
-
-## Testing
+### Testing
 
 To launch your application's tests, run:
 
-    ./mvnw clean test
+```
+./mvnw clean test
+```
 
-### Client tests
-
-Unit tests are run by [Jest][] and written with [Jasmine][]. They're located in [src/test/javascript/](src/test/javascript/) and can be run with:
-
-    npm test
-
-For more information, refer to the [Running tests page][].
-
-### Code quality
+#### Code quality
 
 Sonar is used to analyse code quality. You can start a local Sonar server (accessible on http://localhost:9001) with:
 
 ```
-docker-compose -f src/main/docker/sonar.yml up -d
+docker compose -f docker/sonar.yml up -d
 ```
 
 Then, run a Sonar analysis:
@@ -102,38 +63,14 @@ Then, run a Sonar analysis:
 ./mvnw -Pprod clean test sonar:sonar
 ```
 
-For more information, refer to the [Code quality page][].
+## Contributing
 
-## Using Docker to simplify development (optional)
+We welcome contributions from the community to make ECOS even better. Everyone interacting in the Citeck project’s codebases, issue trackers, chat rooms, and forum is expected to follow the [contributor code of conduct](https://github.com/rubygems/rubygems/blob/master/CODE_OF_CONDUCT.md).
 
-You can use Docker to improve your ECOS-Registry development experience. A number of docker-compose configuration are available in the [src/main/docker](src/main/docker) folder to launch required third party services.
+## Support
 
-For example, to start a postgresql database in a docker container, run:
+If you need any assistance or have any questions regarding Citeck `ecos-gateway`, please create an issue in this repository or reach out to our [support team](mailto:support@citeck.ru).
 
-    docker-compose -f src/main/docker/postgresql.yml up -d
+## License
 
-To stop it and remove the container, run:
-
-    docker-compose -f src/main/docker/postgresql.yml down
-
-You can also fully dockerize your application and all the services that it depends on.
-To achieve this, first build a docker image of your app by running:
-
-    ./mvnw package -Pprod verify jib:dockerBuild
-
-Then run:
-
-    docker-compose -f src/main/docker/app.yml up -d
-
-[node.js]: https://nodejs.org/
-[yarn]: https://yarnpkg.org/
-[webpack]: https://webpack.github.io/
-[angular cli]: https://cli.angular.io/
-[browsersync]: http://www.browsersync.io/
-[jest]: https://facebook.github.io/jest/
-[jasmine]: http://jasmine.github.io/2.0/introduction.html
-[protractor]: https://angular.github.io/protractor/
-[leaflet]: http://leafletjs.com/
-[definitelytyped]: http://definitelytyped.org/
-
-##test
+Citeck `ecos-gateway` is released under the [GNU Lesser General Public License](LICENSE).
