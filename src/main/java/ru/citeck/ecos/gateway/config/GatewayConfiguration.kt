@@ -16,8 +16,10 @@ class GatewayConfiguration {
      */
     @Configuration
     @ConditionalOnProperty("ecos.gateway.rateLimiting.enabled")
-    class RateLimitingConfiguration(private val gatewayProperties: GatewayProperties,
-                                    private val hazelcastInstance: HazelcastInstance) {
+    class RateLimitingConfiguration(
+        private val gatewayProperties: GatewayProperties,
+        private val hazelcastInstance: HazelcastInstance
+    ) {
         @Bean
         fun rateLimitingFilter(): RateLimitingFilter {
             return RateLimitingFilter(gatewayProperties, hazelcastInstance)
