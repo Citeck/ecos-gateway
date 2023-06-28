@@ -29,7 +29,7 @@ To start your application in the dev profile, simply run:
 ./mvnw spring-boot:run
 ```
 
-If your IDE supports starting Spring Boot applications directly, then you can easily run the class 'ru.citeck.ecos.GatewayApp' without additional setup.
+If your IDE supports starting Spring Boot applications directly, then you can easily run the class 'ru.citeck.ecos.gateway.GatewayApp' without additional setup.
 
 ### Building for production
 

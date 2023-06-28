@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
-import ru.citeck.ecos.GatewayApp
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 
 @SpringBootTest(classes = [GatewayApp::class])

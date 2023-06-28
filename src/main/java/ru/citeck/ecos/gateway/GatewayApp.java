@@ -1,4 +1,4 @@
-package ru.citeck.ecos;
+package ru.citeck.ecos.gateway;
 
 import ru.citeck.ecos.gateway.config.GatewayProperties;
 
