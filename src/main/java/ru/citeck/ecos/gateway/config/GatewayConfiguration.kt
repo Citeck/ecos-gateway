@@ -1,5 +1,6 @@
 package ru.citeck.ecos.gateway.config
 
+import com.hazelcast.core.HazelcastInstance
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,10 +16,11 @@ class GatewayConfiguration {
      */
     @Configuration
     @ConditionalOnProperty("ecos.gateway.rateLimiting.enabled")
-    class RateLimitingConfiguration(private val gatewayProperties: GatewayProperties) {
+    class RateLimitingConfiguration(private val gatewayProperties: GatewayProperties,
+                                    private val hazelcastInstance: HazelcastInstance) {
         @Bean
         fun rateLimitingFilter(): RateLimitingFilter {
-            return RateLimitingFilter(gatewayProperties)
+            return RateLimitingFilter(gatewayProperties, hazelcastInstance)
         }
     }
 }

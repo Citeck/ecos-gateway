@@ -1,5 +1,7 @@
 package ru.citeck.ecos.gateway.ratelimiting
 
+import com.hazelcast.cache.impl.HazelcastServerCachingProvider
+import com.hazelcast.core.HazelcastInstance
 import com.netflix.zuul.ZuulFilter
 import com.netflix.zuul.context.RequestContext
 import io.github.bucket4j.Bandwidth
@@ -14,7 +16,6 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.gateway.config.GatewayProperties
 import java.time.Duration
 import java.util.function.Supplier
-import javax.cache.Caching
 import javax.cache.configuration.CompleteConfiguration
 import javax.cache.configuration.MutableConfiguration
 import javax.servlet.http.HttpServletRequest
@@ -27,7 +28,8 @@ import javax.servlet.http.HttpServletRequest
  * .md#example-1---limiting-access-to-http-server-by-ip-address
  */
 class RateLimitingFilter(
-    private val gatewayProperties: GatewayProperties
+    private val gatewayProperties: GatewayProperties,
+    hazelcastInstance: HazelcastInstance
 ) : ZuulFilter() {
 
     companion object {
@@ -38,7 +40,7 @@ class RateLimitingFilter(
     private val buckets: ProxyManager<String>
 
     init {
-        val cachingProvider = Caching.getCachingProvider()
+        val cachingProvider = HazelcastServerCachingProvider.createCachingProvider(hazelcastInstance)
         val cacheManager = cachingProvider.cacheManager
         val config: CompleteConfiguration<String, GridBucketState> = MutableConfiguration<String, GridBucketState>()
             .setTypes(String::class.java, GridBucketState::class.java)
