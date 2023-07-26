@@ -21,7 +21,7 @@ ecos:
   webapp:
     web:
       server:
-        authenticator: username
+        authenticator: username,jwt
       authenticators:
         username:
           type: username
