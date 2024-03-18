@@ -20,6 +20,9 @@ ecos:
       enabled: true
   webapp:
     web:
+      client:
+        maxRequests: 100
+        maxRequestsPerHost: 100
       server:
         authenticator: username,jwt
       authenticators:
