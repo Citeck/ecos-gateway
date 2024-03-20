@@ -7,8 +7,8 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.webapp.lib.web.authenticator.Authentication
 import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticator
 import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticatorsManager
-import ru.citeck.ecos.webapp.lib.web.client.props.EcosWebClientProps
 import ru.citeck.ecos.webapp.lib.web.http.HttpHeaders
+import ru.citeck.ecos.webapp.lib.web.webapi.client.props.EcosWebClientProps
 import javax.annotation.PostConstruct
 
 @Component
