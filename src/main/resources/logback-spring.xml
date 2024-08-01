@@ -3,4 +3,10 @@
 
 <configuration>
     <include resource="ecos/logback-base.xml" />
+
+    <!-- <logger name="ecos" level="DEBUG" /> -->
+   <!-- <logger name="ru.citeck.ecos.ent.model" level="DEBUG" />-->
+   <!-- <logger name="ru.citeck.ecos.txn" level="WARN" />-->
+    <!-- log ecos-data SQL queries -->
+    <!--<logger name="ru.citeck.ecos.data.sql.datasource.DbDataSourceImpl" level="DEBUG" />-->
 </configuration>

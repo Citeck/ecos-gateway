@@ -2,36 +2,23 @@
 server:
   port: 8085
 
-# See http://cloud.spring.io/spring-cloud-netflix/spring-cloud-netflix.html
-zuul: # those values must be configured depending on the application specific needs
-  sensitiveHeaders: #see https://github.com/spring-cloud/spring-cloud-netflix/issues/3126
-  # alow cache-control headers
-  ignored-headers: X-Content-Type-Options,Strict-Transport-Security,X-Frame-Options,X-XSS-Protection
-  add-host-header: true
-  host:
-    max-total-connections: 2000
-    max-per-route-connections: 100
-  semaphore:
-    max-semaphores: 500
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
 
 ecos:
-  gateway:
-    rateLimiting:
-      enabled: true
   webapp:
-    web:
-      client:
-        maxRequests: 100
-        maxRequestsPerHost: 100
-      server:
-        authenticator: username,jwt
-      authenticators:
-        username:
-          type: username
-          createUserIfNotExists: true
-    properties:
-      gatewayMode: true
-    records:
-      defaultApp: alfresco
-      sourceIdMapping:
-        uiserv/eform: uiserv/form
+    task:
+      executors:
+        rr-bridge-records:
+          corePoolSize: 50
+          queueCapacity: 1000
+
+    x509:
+      keys:
+        application:
+          location: classpath:ecos/x509/keys/application.key

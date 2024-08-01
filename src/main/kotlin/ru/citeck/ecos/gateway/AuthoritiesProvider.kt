@@ -1,30 +1,28 @@
-package ru.citeck.ecos.gateway.authenticator.username
+package ru.citeck.ecos.gateway
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthUser
-import ru.citeck.ecos.context.lib.auth.data.SimpleAuthData
+import ru.citeck.ecos.gateway.exception.UserDisabledException
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import ru.citeck.ecos.webapp.lib.web.authenticator.Authentication
-import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticator
 import java.util.concurrent.TimeUnit
 
-/**
- * Authenticator works with raw username in header defined in config
- * This authenticator should not be used in untrusted networks without TLS
- */
-class UsernameAuthenticator(
-    private val config: UsernameAuthenticatorConfig,
+// todo: rewrite to reactive
+@Component
+class AuthoritiesProvider(
     private val recordsService: RecordsService
-) : WebAuthenticator {
+) {
 
     companion object {
+        const val USER_ADMIN = "admin"
+
         private val log = KotlinLogging.logger {}
     }
 
@@ -33,47 +31,37 @@ class UsernameAuthenticator(
         .maximumSize(400)
         .build(CacheLoader.from<String, UserAuthInfo> { evalUserAuthorities(it) })
 
-    override fun getAuthHeader(auth: Authentication): String {
-        return auth.runAs.getUser()
-    }
-
-    override fun getAuthFromHeader(header: String): Authentication {
-        var authInfo = authoritiesCache.getUnchecked(header)
-        if (header != "admin" && authInfo.isDisabled) {
+    fun getAuthorities(userName: String): List<String> {
+        var authInfo = authoritiesCache.getUnchecked(userName)
+        if (userName != USER_ADMIN && authInfo.isDisabled) {
             throw UserDisabledException("User is disabled")
         }
         if (authInfo.notExists) {
-            if (header == "guest") {
+            if (userName == "guest") {
                 error("User 'guest' does not exists and can't be created automatically")
             }
-            if (header == "admin") {
+            if (userName == USER_ADMIN) {
                 // admin will be created by patch in ecos-model
                 error("User 'admin' is not created yet. Please try again later")
             }
-            if (config.createUserIfNotExists) {
-                synchronized(this) {
-                    authoritiesCache.invalidate(header)
-                    authInfo = authoritiesCache.getUnchecked(header)
-                    if (authInfo.notExists) {
-                        log.info { "Create new user with username: '$header'" }
-                        AuthContext.runAsSystem {
-                            recordsService.create(
-                                "${AppName.EMODEL}/person",
-                                mapOf(
-                                    "id" to header
-                                )
-                            )
-                        }
-                        authoritiesCache.invalidate(header)
-                        authInfo = authoritiesCache.getUnchecked(header)
+            synchronized(this) {
+                authoritiesCache.invalidate(userName)
+                authInfo = authoritiesCache.getUnchecked(userName)
+                if (authInfo.notExists) {
+                    log.info { "Create new user with username: '$userName'" }
+                    AuthContext.runAsSystem {
+                        recordsService.create(
+                            "${AppName.EMODEL}/person",
+                            mapOf("id" to userName)
+                        )
                     }
+                    authoritiesCache.invalidate(userName)
+                    authInfo = authoritiesCache.getUnchecked(userName)
                 }
-            } else {
-                error("User '$header' does not exists and can't be created automatically")
             }
         }
 
-        return Authentication(header, SimpleAuthData(header, authInfo.authorities))
+        return authInfo.authorities
     }
 
     private fun evalUserAuthorities(userName: String?): UserAuthInfo {
@@ -95,10 +83,6 @@ class UsernameAuthenticator(
             userAtts.personDisabled == true,
             userAtts.notExists == true
         )
-    }
-
-    override fun getAuthHeaderName(): String {
-        return config.header
     }
 
     class EmodelUserAuthAtts(
