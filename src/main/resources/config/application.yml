@@ -12,12 +12,13 @@ spring:
 
 ecos:
   webapp:
+    properties:
+      gatewayMode: true
     task:
       executors:
         rr-bridge-records:
           corePoolSize: 50
           queueCapacity: 1000
-
     x509:
       keys:
         application:
