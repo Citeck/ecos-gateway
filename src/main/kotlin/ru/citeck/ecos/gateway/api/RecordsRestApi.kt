@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
+import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.client.ClientContext
@@ -22,20 +23,29 @@ import ru.citeck.ecos.context.lib.client.data.ClientData
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.context.lib.time.TimeZoneContext
 import ru.citeck.ecos.gateway.EcosContextData
+import ru.citeck.ecos.records2.request.error.ErrorUtils
 import ru.citeck.ecos.records2.request.result.RecordsResult
 import ru.citeck.ecos.records2.utils.SecurityUtils
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.request.msg.MsgLevel
+import ru.citeck.ecos.records3.record.request.msg.MsgType
+import ru.citeck.ecos.records3.record.request.msg.ReqMsg
 import ru.citeck.ecos.records3.rest.RestHandlerAdapter
 import ru.citeck.ecos.records3.rest.v1.RequestResp
+import ru.citeck.ecos.records3.rest.v1.delete.DeleteResp
+import ru.citeck.ecos.records3.rest.v1.mutate.MutateResp
+import ru.citeck.ecos.records3.rest.v1.query.QueryResp
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridge
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridgeFactory
 import java.time.Duration
+import java.time.Instant
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
 @RestController
 @RequestMapping("/api/records")
 class RecordsRestApi @Autowired constructor(
-    services: RecordsServiceFactory,
+    private val services: RecordsServiceFactory,
     private val reactorBridgeFactory: ReactorBridgeFactory,
 ) {
 
@@ -65,8 +75,8 @@ class RecordsRestApi @Autowired constructor(
     ): Mono<ResponseEntity<ByteArray>> {
         val bodyData = Json.mapper.readNotNull(body, ObjectNode::class.java)
         val version = bodyData.get("version").asInt(2)
-        return doInContext {
-            encodeResponse(restHandlerAdapter.queryRecords(bodyData, version))
+        return doInContext(QueryResp::class) {
+            restHandlerAdapter.queryRecords(bodyData, version)
         }
     }
 
@@ -76,8 +86,8 @@ class RecordsRestApi @Autowired constructor(
         body: ByteArray
     ): Mono<ResponseEntity<ByteArray>> {
         val mutationBody = Json.mapper.readNotNull(body, ObjectNode::class.java)
-        return doInContext {
-            encodeResponse(restHandlerAdapter.mutateRecords(mutationBody, 1))
+        return doInContext(MutateResp::class) {
+            restHandlerAdapter.mutateRecords(mutationBody, 1)
         }
     }
 
@@ -87,13 +97,14 @@ class RecordsRestApi @Autowired constructor(
         body: ByteArray
     ): Mono<ResponseEntity<ByteArray>> {
         val deletionBody = Json.mapper.readNotNull(body, ObjectNode::class.java)
-        return doInContext {
-            encodeResponse(restHandlerAdapter.deleteRecords(deletionBody, 1))
+        return doInContext(DeleteResp::class) {
+            restHandlerAdapter.deleteRecords(deletionBody, 1)
         }
     }
 
-    private inline fun doInContext(
-        crossinline action: () -> ResponseEntity<ByteArray>
+    private inline fun <R : RequestResp> doInContext(
+        respType: KClass<R>,
+        crossinline action: () -> Any
     ): Mono<ResponseEntity<ByteArray>> {
 
         return EcosContextData.getFromContext().flatMap { contextData ->
@@ -102,12 +113,33 @@ class RecordsRestApi @Autowired constructor(
                     AuthContext.runAsFull(contextData.userAuth) {
                         TimeZoneContext.doWithUtcOffset(Duration.ofMinutes(contextData.timeZoneOffsetInMinutes)) {
                             doWithClientData(contextData.realIp) {
-                                action.invoke()
+                                encodeResponse(action.invoke())
                             }
                         }
                     }
                 }
             }
+        }.onErrorResume { error ->
+            val response = respType.createInstance()
+            val errorData = ErrorUtils.convertException(error, services)
+            val reqMsg = ReqMsg(
+                MsgLevel.ERROR,
+                Instant.now(),
+                getMessageTypeByClass(errorData::class.java),
+                DataValue.create(errorData),
+                "",
+                emptyList()
+            )
+            response.messages.add(reqMsg)
+            Mono.just(encodeResponse(response))
+        }
+    }
+
+    private fun getMessageTypeByClass(clazz: Class<*>): String {
+        return if (clazz == String::class.java) {
+            "text"
+        } else {
+            clazz.getAnnotation(MsgType::class.java)?.value ?: "any"
         }
     }
 
