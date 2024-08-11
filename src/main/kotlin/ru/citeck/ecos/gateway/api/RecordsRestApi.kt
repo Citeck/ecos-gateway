@@ -1,7 +1,9 @@
 package ru.citeck.ecos.gateway.api
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
@@ -17,12 +19,10 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
-import ru.citeck.ecos.context.lib.client.ClientContext
-import ru.citeck.ecos.context.lib.client.data.ClientData
-import ru.citeck.ecos.context.lib.i18n.I18nContext
-import ru.citeck.ecos.context.lib.time.TimeZoneContext
-import ru.citeck.ecos.gateway.EcosContextData
+import ru.citeck.ecos.context.lib.ctx.EcosContext
+import ru.citeck.ecos.gateway.ReactorEcosContextUtils
 import ru.citeck.ecos.records2.request.error.ErrorUtils
 import ru.citeck.ecos.records2.request.result.RecordsResult
 import ru.citeck.ecos.records2.utils.SecurityUtils
@@ -37,7 +37,6 @@ import ru.citeck.ecos.records3.rest.v1.mutate.MutateResp
 import ru.citeck.ecos.records3.rest.v1.query.QueryResp
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridge
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridgeFactory
-import java.time.Duration
 import java.time.Instant
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -47,7 +46,9 @@ import kotlin.reflect.full.createInstance
 class RecordsRestApi @Autowired constructor(
     private val services: RecordsServiceFactory,
     private val reactorBridgeFactory: ReactorBridgeFactory,
+    private val ecosContext: EcosContext
 ) {
+    private val log = KotlinLogging.logger {}
 
     private lateinit var recordsReactorBridge: ReactorBridge
 
@@ -57,10 +58,7 @@ class RecordsRestApi @Autowired constructor(
 
     @PostConstruct
     fun init() {
-        recordsReactorBridge = reactorBridgeFactory.getBridge(
-            "records-rest-api",
-            "rr-bridge-records"
-        )
+        recordsReactorBridge = reactorBridgeFactory.getBridge("recs-api")
     }
 
     @EventListener
@@ -107,31 +105,29 @@ class RecordsRestApi @Autowired constructor(
         crossinline action: () -> Any
     ): Mono<ResponseEntity<ByteArray>> {
 
-        return EcosContextData.getFromContext().flatMap { contextData ->
+        return ReactorEcosContextUtils.getFromContext().flatMap { contextData ->
             recordsReactorBridge.execute {
-                I18nContext.doWithLocale(contextData.locale) {
-                    AuthContext.runAsFull(contextData.userAuth) {
-                        TimeZoneContext.doWithUtcOffset(Duration.ofMinutes(contextData.timeZoneOffsetInMinutes)) {
-                            doWithClientData(contextData.realIp) {
-                                encodeResponse(action.invoke())
-                            }
-                        }
-                    }
+                ecosContext.newScope(contextData).use {
+                    encodeResponse(action.invoke())
                 }
+            }.onErrorResume { error ->
+                val user = AuthContext.get(contextData).fullAuth.getUser()
+                MDC.putCloseable(AuthConstants.MDC_USER_KEY, user).use {
+                    log.error(error) { "Records request was failed" }
+                }
+                val response = respType.createInstance()
+                val errorData = ErrorUtils.convertException(error, services)
+                val reqMsg = ReqMsg(
+                    MsgLevel.ERROR,
+                    Instant.now(),
+                    getMessageTypeByClass(errorData::class.java),
+                    DataValue.create(errorData),
+                    "",
+                    emptyList()
+                )
+                response.messages.add(reqMsg)
+                Mono.just(encodeResponse(response))
             }
-        }.onErrorResume { error ->
-            val response = respType.createInstance()
-            val errorData = ErrorUtils.convertException(error, services)
-            val reqMsg = ReqMsg(
-                MsgLevel.ERROR,
-                Instant.now(),
-                getMessageTypeByClass(errorData::class.java),
-                DataValue.create(errorData),
-                "",
-                emptyList()
-            )
-            response.messages.add(reqMsg)
-            Mono.just(encodeResponse(response))
         }
     }
 
@@ -140,14 +136,6 @@ class RecordsRestApi @Autowired constructor(
             "text"
         } else {
             clazz.getAnnotation(MsgType::class.java)?.value ?: "any"
-        }
-    }
-
-    private inline fun <T> doWithClientData(realIp: String?, crossinline action: () -> T): T {
-        return if (realIp.isNullOrBlank()) {
-            action.invoke()
-        } else {
-            ClientContext.doWithClientData(ClientData(realIp)) { action.invoke() }
         }
     }
 

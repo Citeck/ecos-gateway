@@ -13,7 +13,7 @@
     <parent>
         <groupId>ru.citeck.ecos.webapp</groupId>
         <artifactId>ecos-webapp-spring-webflux-base-parent</artifactId>
-        <version>3.0.2</version>
+        <version>3.1.0</version>
     </parent>
 
 	<properties>
@@ -23,9 +23,8 @@
 	<dependencies>
 
         <dependency>
-            <groupId>ru.citeck.ecos.webapp</groupId>
-            <artifactId>ecos-webapp-lib</artifactId>
-            <version>${ecos.webapp.version}</version>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
 		<dependency>

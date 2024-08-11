@@ -34,7 +34,7 @@ class GatewayResource(
 
     @PostConstruct
     fun init() {
-        bridge = reactorBridgeFactory.getMainBridge()
+        bridge = reactorBridgeFactory.getBridge("touch")
     }
 
     @GetMapping("/touch")
