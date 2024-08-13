@@ -32,6 +32,8 @@ class GatewaySecurityFilter {
                     .pathMatchers("/*/pub/**").permitAll()
                     .pathMatchers("/api/**").hasAnyAuthority(AuthRole.USER, AuthRole.ADMIN)
                     .pathMatchers("/*/api/**").hasAnyAuthority(AuthRole.USER, AuthRole.ADMIN)
+                    .pathMatchers("/*/alfresco/**").hasAnyAuthority(AuthRole.USER, AuthRole.ADMIN)
+                    .pathMatchers("/*/share/**").hasAnyAuthority(AuthRole.USER, AuthRole.ADMIN)
                     .pathMatchers("/management/health").permitAll()
                     .pathMatchers("/management/info").permitAll()
                     // Open metrics, because at current installations we always behind reverse proxy
