@@ -37,7 +37,13 @@
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
-	</dependencies>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
 
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
