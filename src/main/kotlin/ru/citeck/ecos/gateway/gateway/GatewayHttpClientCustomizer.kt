@@ -15,5 +15,6 @@ class GatewayHttpClientCustomizer(
 
     override fun customize(httpClient: HttpClient): HttpClient {
         return NettyHttpClientUtils.configureTls(httpClient, x509Registry, webClientProps.tls)
+            .httpResponseDecoder { it.maxHeaderSize(40_000) }
     }
 }

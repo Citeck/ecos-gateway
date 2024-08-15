@@ -18,6 +18,12 @@ class GatewayOutcomeFilter(
     private val ecosContext: EcosContext
 ) : GlobalFilter {
 
+    companion object {
+        private val HEADERS_TO_FILTER = setOf(
+            "upgrade-insecure-requests"
+        )
+    }
+
     private val authenticator = authenticatorsManager.getJwtAuthenticator("jwt")
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
@@ -30,7 +36,19 @@ class GatewayOutcomeFilter(
         }.flatMap { token ->
             val newRequest = exchange.request
                 .mutate()
-                .header(EcosHttpHeaders.AUTHORIZATION, "Bearer $token")
+                .headers {
+                    it.setBearerAuth(token)
+                    for (header in HEADERS_TO_FILTER) {
+                        it.remove(header)
+                    }
+                    val iter = it.keys.iterator()
+                    while (iter.hasNext()) {
+                        val key = iter.next()
+                        if (key.startsWith("sec-", ignoreCase = true)) {
+                            iter.remove()
+                        }
+                    }
+                }
                 .build()
             val newExchange = exchange.mutate()
                 .request(newRequest)
