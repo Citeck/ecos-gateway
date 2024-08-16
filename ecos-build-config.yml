@@ -4,3 +4,4 @@ properties:
   jdk: JDK21
   image:
     multiplatform: true
+    baseImage: openjdk:21-oraclelinux8

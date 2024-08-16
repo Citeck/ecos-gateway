@@ -48,6 +48,9 @@ class AuthoritiesProvider(
         .build<String, UserAuthInfo> { evalUserAuthorities(it) }
 
     fun getAuthorities(userName: String): List<String> {
+        if (userName.isBlank()) {
+            return emptyList()
+        }
         if (userName == AuthUser.SYSTEM) {
             error("System user can't use gateway")
         }
@@ -89,8 +92,6 @@ class AuthoritiesProvider(
 
         val userRef = EntityRef.create(AppName.EMODEL, "person", userName)
 
-        var userAtts: EmodelUserAuthAtts = EmodelUserAuthAtts.EMPTY
-
         val timeout = System.currentTimeMillis() + 60_000
         fun checkTimeout(exceptionProvider: () -> Throwable) {
             if (System.currentTimeMillis() > timeout) {
@@ -101,15 +102,10 @@ class AuthoritiesProvider(
             checkTimeout {
                 RuntimeException("Application is not available: ${AppName.EMODEL}")
             }
-            Thread.sleep(500)
+            Thread.sleep(1000)
         }
-        try {
-            userAtts = AuthContext.runAsSystem {
-                recordsService.getAtts(userRef, EmodelUserAuthAtts::class.java)
-            }
-        } catch (e: Throwable) {
-            checkTimeout { e }
-            Thread.sleep(2000)
+        val userAtts: EmodelUserAuthAtts = AuthContext.runAsSystem {
+            recordsService.getAtts(userRef, EmodelUserAuthAtts::class.java)
         }
 
         val authorities = userAtts.authorities ?: error("User authorities is null. User: $userName")
