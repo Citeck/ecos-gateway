@@ -15,6 +15,7 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
 
@@ -39,19 +40,19 @@ class AuthoritiesProvider(
         .softValues()
         .build<String, String> { it }
 
+    private val cacheUpdateExecutor = Executors.newThreadPerTaskExecutor(
+        Thread.ofVirtual().name("cache-update").factory()
+    )
+
     private val authoritiesCache = Caffeine.newBuilder()
         .maximumSize(100_000)
         .expireAfterAccess(Duration.ofMinutes(1))
         .refreshAfterWrite(Duration.ofSeconds(20))
-        .executor(
-            Executors.newThreadPerTaskExecutor(
-                Thread.ofVirtual().name("cache-update").factory()
-            )
-        )
-        .buildAsync<String, UserAuthInfo> { key, executor ->
+        .executor(cacheUpdateExecutor)
+        .buildAsync<String, UserAuthInfo> { key, _ ->
             // async build required to avoid thread pinning in ConcurrentHashMap.computeIfAbsent
-            val result = CompletableFuture<UserAuthInfo>()
-            executor.execute {
+            val result = CompletableFutureWrapper<UserAuthInfo>()
+            result.future = cacheUpdateExecutor.submit {
                 try {
                     result.complete(evalUserAuthorities(key))
                 } catch (e: Throwable) {
@@ -117,14 +118,28 @@ class AuthoritiesProvider(
         val userRef = EntityRef.create(AppName.EMODEL, "person", userName)
 
         val timeout = System.currentTimeMillis() + 60_000
-        fun checkTimeout(exceptionProvider: () -> Throwable) {
-            if (System.currentTimeMillis() > timeout) {
-                throw exceptionProvider()
+        var userAuth: EmodelUserAuthAtts? = null
+        while (userAuth == null) {
+            try {
+                userAuth = AuthContext.runAsSystem {
+                    recordsService.getAtts(userRef, EmodelUserAuthAtts::class.java)
+                }
+            } catch (e: Throwable) {
+                if (remoteWebAppsApi.isAppAvailable(AppName.EMODEL)) {
+                    throw e
+                }
+                while (!remoteWebAppsApi.isAppAvailable(AppName.EMODEL)) {
+                    if (System.currentTimeMillis() > timeout) {
+                        throw RuntimeException("Application is not available: ${AppName.EMODEL}")
+                    }
+                    Thread.sleep(1000)
+                }
             }
         }
+
         while (!remoteWebAppsApi.isAppAvailable(AppName.EMODEL)) {
-            checkTimeout {
-                RuntimeException("Application is not available: ${AppName.EMODEL}")
+            if (System.currentTimeMillis() > timeout) {
+                throw RuntimeException("Application is not available: ${AppName.EMODEL}")
             }
             Thread.sleep(1000)
         }
@@ -153,4 +168,14 @@ class AuthoritiesProvider(
         val isDisabled: Boolean = false,
         val notExists: Boolean
     )
+
+    private class CompletableFutureWrapper<T> (
+        var future: Future<*>? = null
+    ) : CompletableFuture<T>() {
+
+        override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
+            future?.cancel(mayInterruptIfRunning)
+            return super.cancel(mayInterruptIfRunning)
+        }
+    }
 }
