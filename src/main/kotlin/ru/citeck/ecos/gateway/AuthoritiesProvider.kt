@@ -13,7 +13,9 @@ import ru.citeck.ecos.webapp.api.apps.EcosRemoteWebAppsApi
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 import java.util.concurrent.locks.ReentrantLock
 
 @Component
@@ -29,6 +31,7 @@ class AuthoritiesProvider(
     }
 
     private val createNonexistentUserLock = ReentrantLock()
+    private val concurrentRequestsSemaphore = Semaphore(50)
 
     // simple cache to avoid strings duplications in memory
     private val authorityStringsCache = Caffeine.newBuilder()
@@ -45,7 +48,18 @@ class AuthoritiesProvider(
                 Thread.ofVirtual().name("cache-update").factory()
             )
         )
-        .build<String, UserAuthInfo> { evalUserAuthorities(it) }
+        .buildAsync<String, UserAuthInfo> { key, executor ->
+            // async build required to avoid thread pinning in ConcurrentHashMap.computeIfAbsent
+            val result = CompletableFuture<UserAuthInfo>()
+            executor.execute {
+                try {
+                    result.complete(evalUserAuthorities(key))
+                } catch (e: Throwable) {
+                    result.completeExceptionally(e)
+                }
+            }
+            result
+        }
 
     fun getAuthorities(userName: String): List<String> {
         if (userName.isBlank()) {
@@ -54,7 +68,7 @@ class AuthoritiesProvider(
         if (userName == AuthUser.SYSTEM) {
             error("System user can't use gateway")
         }
-        var authInfo = authoritiesCache.get(userName)
+        var authInfo = authoritiesCache.get(userName).get()
         if (userName != USER_ADMIN && authInfo.isDisabled) {
             throw UserDisabledException("User is disabled")
         }
@@ -68,8 +82,9 @@ class AuthoritiesProvider(
             }
             createNonexistentUserLock.lock()
             try {
-                authoritiesCache.invalidate(userName)
-                authInfo = authoritiesCache.get(userName)
+
+                authoritiesCache.asMap().remove(userName)
+                authInfo = authoritiesCache.get(userName).get()
                 if (authInfo.notExists) {
                     log.info { "Create new user with username: '$userName'" }
                     AuthContext.runAsSystem {
@@ -78,8 +93,8 @@ class AuthoritiesProvider(
                             mapOf("id" to userName)
                         )
                     }
-                    authoritiesCache.invalidate(userName)
-                    authInfo = authoritiesCache.get(userName)
+                    authoritiesCache.asMap().remove(userName)
+                    authInfo = authoritiesCache.get(userName).get()
                 }
             } finally {
                 createNonexistentUserLock.unlock()
@@ -89,6 +104,15 @@ class AuthoritiesProvider(
     }
 
     private fun evalUserAuthorities(userName: String): UserAuthInfo {
+        concurrentRequestsSemaphore.acquire()
+        try {
+            return evalUserAuthoritiesImpl(userName)
+        } finally {
+            concurrentRequestsSemaphore.release()
+        }
+    }
+
+    private fun evalUserAuthoritiesImpl(userName: String): UserAuthInfo {
 
         val userRef = EntityRef.create(AppName.EMODEL, "person", userName)
 
@@ -122,15 +146,7 @@ class AuthoritiesProvider(
         val personDisabled: Boolean?,
         @AttName(RecordConstants.ATT_NOT_EXISTS)
         val notExists: Boolean?
-    ) {
-        companion object {
-            val EMPTY = EmodelUserAuthAtts(
-                null,
-                null,
-                null
-            )
-        }
-    }
+    )
 
     data class UserAuthInfo(
         val authorities: List<String>,
