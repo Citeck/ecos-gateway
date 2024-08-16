@@ -97,21 +97,19 @@ class AuthoritiesProvider(
                 throw exceptionProvider()
             }
         }
-        while (userAtts === EmodelUserAuthAtts.EMPTY) {
-            while (!remoteWebAppsApi.isAppAvailable(AppName.EMODEL)) {
-                checkTimeout {
-                    RuntimeException("Application is not available: ${AppName.EMODEL}")
-                }
-                Thread.sleep(500)
+        while (!remoteWebAppsApi.isAppAvailable(AppName.EMODEL)) {
+            checkTimeout {
+                RuntimeException("Application is not available: ${AppName.EMODEL}")
             }
-            try {
-                userAtts = AuthContext.runAsSystem {
-                    recordsService.getAtts(userRef, EmodelUserAuthAtts::class.java)
-                }
-            } catch (e: Throwable) {
-                checkTimeout { e }
-                Thread.sleep(2000)
+            Thread.sleep(500)
+        }
+        try {
+            userAtts = AuthContext.runAsSystem {
+                recordsService.getAtts(userRef, EmodelUserAuthAtts::class.java)
             }
+        } catch (e: Throwable) {
+            checkTimeout { e }
+            Thread.sleep(2000)
         }
 
         val authorities = userAtts.authorities ?: error("User authorities is null. User: $userName")
