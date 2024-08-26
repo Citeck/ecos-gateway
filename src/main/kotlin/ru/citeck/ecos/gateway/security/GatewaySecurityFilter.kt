@@ -35,6 +35,8 @@ class GatewaySecurityFilter {
                     .pathMatchers("/*/alfresco/**").hasAnyAuthority(AuthRole.USER, AuthRole.ADMIN)
                     .pathMatchers("/*/share/**").hasAnyAuthority(AuthRole.USER, AuthRole.ADMIN)
                     .pathMatchers("/management/health").permitAll()
+                    // This is for test purposes. Normally management endpoints should be used directly without gateway
+                    .pathMatchers("/*/management/**").hasAnyAuthority(AuthRole.ADMIN)
                     .pathMatchers("/management/info").permitAll()
                     // Open metrics, because at current installations we always behind reverse proxy
                     .pathMatchers("/management/prometheus").permitAll()
