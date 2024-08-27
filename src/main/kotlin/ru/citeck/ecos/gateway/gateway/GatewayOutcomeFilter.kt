@@ -10,7 +10,6 @@ import ru.citeck.ecos.context.lib.ctx.EcosContext
 import ru.citeck.ecos.gateway.ReactorEcosContextUtils
 import ru.citeck.ecos.webapp.lib.web.authenticator.Authentication
 import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticatorsManager
-import ru.citeck.ecos.webapp.lib.web.http.EcosHttpHeaders
 
 @Component
 class GatewayOutcomeFilter(
