@@ -2,6 +2,7 @@ package ru.citeck.ecos.gateway
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
+import org.slf4j.MDC
 import org.springframework.boot.web.reactive.filter.OrderedWebFilter
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.data.AuthData
 import ru.citeck.ecos.context.lib.auth.data.AuthState
@@ -46,8 +48,26 @@ class GatewayIncomeFilter(
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-
         val user = exchange.request.headers.getFirst(EcosHttpHeaders.X_ECOS_USER)
+        return if (user.isNullOrEmpty()) {
+            chain.filter(exchange)
+        } else {
+            filterWithUser(user, exchange, chain)
+        }.doOnError { error ->
+            val request = exchange.request
+            val message = "${request.method} ${exchange.request.uri} request error"
+            if (user.isNullOrEmpty()) {
+                log.error(error) { message }
+            } else {
+                MDC.putCloseable(AuthConstants.MDC_USER_KEY, user).use {
+                    log.error(error) { message }
+                }
+            }
+        }
+    }
+
+    private fun filterWithUser(user: String, exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+
         val tzOffset = readTimeZone(exchange.request.headers)
         val locale = exchange.localeContext.locale ?: I18nContext.ENGLISH
         val realIp = exchange.request.headers.getFirst(EcosHttpHeaders.X_REAL_IP)
@@ -57,33 +77,29 @@ class GatewayIncomeFilter(
             exchange.response.headers.set(EcosHttpHeaders.X_ECOS_TRACE_ID, traceId)
         }
 
-        if (!user.isNullOrEmpty()) {
-            return getAuthoritiesBridge.execute {
-                authoritiesProvider.getAuthorities(user)
-            }.flatMap { authorities ->
-                val authData = SimpleAuthData(user, authorities)
+        return getAuthoritiesBridge.execute {
+            authoritiesProvider.getAuthorities(user)
+        }.flatMap { authorities ->
+            val authData = SimpleAuthData(user, authorities)
 
-                val ctxData = ecosContext.newScope().use { scope ->
+            val ctxData = ecosContext.newScope().use { scope ->
 
-                    I18nContext.set(scope, locale)
-                    ClientContext.set(scope, ClientData(realIp ?: ""))
-                    TimeZoneContext.set(scope, tzOffset)
-                    AuthContext.set(scope, AuthState(authData))
+                I18nContext.set(scope, locale)
+                ClientContext.set(scope, ClientData(realIp ?: ""))
+                TimeZoneContext.set(scope, tzOffset)
+                AuthContext.set(scope, AuthState(authData))
 
-                    ecosContext.getScopeData()
-                }
-
-                chain.filter(exchange)
-                    .contextWrite(
-                        ReactiveSecurityContextHolder.withAuthentication(
-                            buildAuthentication(authData)
-                        )
-                    ).contextWrite(
-                        ReactorEcosContextUtils.withContextData(ctxData)
-                    )
+                ecosContext.getScopeData()
             }
-        } else {
-            return chain.filter(exchange)
+
+            chain.filter(exchange)
+                .contextWrite(
+                    ReactiveSecurityContextHolder.withAuthentication(
+                        buildAuthentication(authData)
+                    )
+                ).contextWrite(
+                    ReactorEcosContextUtils.withContextData(ctxData)
+                )
         }
     }
 
