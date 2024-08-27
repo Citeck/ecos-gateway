@@ -55,26 +55,31 @@ class GatewayIncomeFilter(
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val user = exchange.request.headers.getFirst(EcosHttpHeaders.X_ECOS_USER)
+
         return if (user.isNullOrEmpty()) {
             chain.filter(exchange)
         } else {
             filterWithUser(user, exchange, chain)
         }.doOnError { error ->
-            if (user.isNullOrEmpty()) {
-                log.error { extractErrorMsg(exchange, error) }
-            } else {
-                MDC.putCloseable(AuthConstants.MDC_USER_KEY, user).use {
-                    log.error { extractErrorMsg(exchange, error) }
-                }
-            }
+            logRequestError(user, exchange, error)
         }.then(
             Mono.fromRunnable {
                 val response = exchange.response
                 if (response.statusCode?.is2xxSuccessful != true) {
-                    log.error { extractErrorMsg(exchange, null) }
+                    logRequestError(user, exchange, null)
                 }
             }
         )
+    }
+
+    private fun logRequestError(user: String?, exchange: ServerWebExchange, error: Throwable?) {
+        if (user.isNullOrEmpty()) {
+            log.error { extractErrorMsg(exchange, error) }
+        } else {
+            MDC.putCloseable(AuthConstants.MDC_USER_KEY, user).use {
+                log.error { extractErrorMsg(exchange, error) }
+            }
+        }
     }
 
     private fun filterWithUser(user: String, exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -182,7 +187,7 @@ class GatewayIncomeFilter(
             } else {
                 "no-lb-resp"
             }
-            return "\"$requestMethod ${requestUri}\" {$lbMsg} $statusCode $errorMsg"
+            return "\"$requestMethod ${requestUri}\" $statusCode ($lbMsg) $errorMsg"
         }
     }
 }
