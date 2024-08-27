@@ -65,7 +65,14 @@ class GatewayIncomeFilter(
                     log.error { extractErrorInfo(exchange, error).toString() }
                 }
             }
-        }
+        }.then(
+            Mono.fromRunnable {
+                val response = exchange.response
+                if (response.statusCode?.is2xxSuccessful != true) {
+                    log.error { extractErrorInfo(exchange, null).toString() }
+                }
+            }
+        )
     }
 
     private fun filterWithUser(user: String, exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -136,16 +143,20 @@ class GatewayIncomeFilter(
         return -100
     }
 
-    private fun extractErrorInfo(exchange: ServerWebExchange, error: Throwable): RequestErrorInfo {
+    private fun extractErrorInfo(exchange: ServerWebExchange, error: Throwable?): RequestErrorInfo {
         val statusCode = if (error is ErrorResponse) {
             error.statusCode.value()
         } else {
             -1
         }
-        val rootCause = ExceptionUtils.getRootCause(error)
-        val errorMsg = rootCause::class.simpleName + ": " + rootCause.message
 
         val request = exchange.request
+        val errorMsg = if (error != null) {
+            val rootCause = ExceptionUtils.getRootCause(error)
+            rootCause::class.simpleName + ": " + rootCause.message
+        } else {
+            ""
+        }
 
         return RequestErrorInfo(statusCode, request.method, request.uri, errorMsg)
     }
