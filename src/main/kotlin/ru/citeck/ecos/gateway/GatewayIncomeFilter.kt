@@ -187,7 +187,7 @@ class GatewayIncomeFilter(
             } else {
                 "no-lb-resp"
             }
-            return "\"$requestMethod ${requestUri}\" $statusCode ($lbMsg) $errorMsg"
+            return "$requestMethod $requestUri $statusCode ($lbMsg) $errorMsg"
         }
     }
 }
