@@ -20,3 +20,7 @@ ecos:
       keys:
         application:
           location: classpath:ecos/x509/keys/application.key
+    records:
+      defaultApp: alfresco
+      sourceIdMapping:
+        uiserv/eform: uiserv/form
