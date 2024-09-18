@@ -63,7 +63,7 @@ class AuthoritiesProvider(
         }
 
     fun getAuthorities(userName: String): List<String> {
-        if (userName.isBlank()) {
+        if (userName.isBlank() || userName == AuthUser.GUEST) {
             return emptyList()
         }
         if (userName == AuthUser.SYSTEM) {
@@ -74,9 +74,6 @@ class AuthoritiesProvider(
             throw UserDisabledException("User is disabled")
         }
         if (authInfo.notExists) {
-            if (userName == "guest") {
-                error("User 'guest' does not exists and can't be created automatically")
-            }
             if (userName == USER_ADMIN) {
                 // admin will be created by patch in ecos-model
                 error("User 'admin' is not created yet. Please try again later")
