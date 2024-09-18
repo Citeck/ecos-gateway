@@ -28,15 +28,21 @@ class GatewayOutcomeFilter(
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
 
         return ReactorEcosContextUtils.getFromContext().map { context ->
-            ecosContext.newScope(context).use {
-                val fullAuth = AuthContext.getCurrentFullAuth()
-                authenticator.createJwtToken(Authentication(fullAuth.getUser(), fullAuth))
+            if (context.isPresent) {
+                ecosContext.newScope(context.get()).use {
+                    val fullAuth = AuthContext.getCurrentFullAuth()
+                    authenticator.createJwtToken(Authentication(fullAuth.getUser(), fullAuth))
+                }
+            } else {
+                ""
             }
         }.flatMap { token ->
             val newRequest = exchange.request
                 .mutate()
                 .headers {
-                    it.setBearerAuth(token)
+                    if (token.isNotBlank()) {
+                        it.setBearerAuth(token)
+                    }
                     for (header in HEADERS_TO_FILTER) {
                         it.remove(header)
                     }

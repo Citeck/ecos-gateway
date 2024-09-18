@@ -4,6 +4,7 @@ import reactor.core.publisher.Mono
 import reactor.util.context.Context
 import reactor.util.context.ContextView
 import ru.citeck.ecos.context.lib.ctx.CtxScopeData
+import java.util.*
 
 object ReactorEcosContextUtils {
 
@@ -13,7 +14,7 @@ object ReactorEcosContextUtils {
         return Context.of(RR_CONTEXT_KEY, data)
     }
 
-    fun getFromContext(): Mono<CtxScopeData> {
+    fun getFromContext(): Mono<Optional<CtxScopeData>> {
         return Mono.deferContextual { contextView ->
             Mono.just(contextView)
         }.map {
@@ -21,8 +22,7 @@ object ReactorEcosContextUtils {
         }
     }
 
-    fun getFromContext(context: ContextView): CtxScopeData {
-        return context.get(RR_CONTEXT_KEY)
+    fun getFromContext(context: ContextView): Optional<CtxScopeData> {
+        return context.getOrEmpty(RR_CONTEXT_KEY)
     }
-
 }

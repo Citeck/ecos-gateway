@@ -21,6 +21,7 @@ import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.context.lib.ctx.EcosContext
 import ru.citeck.ecos.gateway.ReactorEcosContextUtils
 import ru.citeck.ecos.records2.request.error.ErrorUtils
@@ -107,11 +108,17 @@ class RecordsRestApi @Autowired constructor(
 
         return ReactorEcosContextUtils.getFromContext().flatMap { contextData ->
             recordsReactorBridge.execute {
-                ecosContext.newScope(contextData).use {
+                if (contextData.isEmpty) {
                     encodeResponse(action.invoke())
+                } else {
+                    ecosContext.newScope(contextData.get()).use {
+                        encodeResponse(action.invoke())
+                    }
                 }
             }.onErrorResume { error ->
-                val user = AuthContext.get(contextData).fullAuth.getUser()
+                val user = contextData.map {
+                    AuthContext.get(it).fullAuth.getUser()
+                }.orElse(AuthUser.ANONYMOUS)
                 MDC.putCloseable(AuthConstants.MDC_USER_KEY, user).use {
                     log.error(error) { "Records request was failed" }
                 }
