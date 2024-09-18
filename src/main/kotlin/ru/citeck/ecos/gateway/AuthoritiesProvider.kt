@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.gateway.exception.UserDisabledException
 import ru.citeck.ecos.records2.RecordConstants
@@ -63,8 +64,11 @@ class AuthoritiesProvider(
         }
 
     fun getAuthorities(userName: String): List<String> {
-        if (userName.isBlank() || userName == AuthUser.GUEST) {
+        if (userName.isBlank()) {
             return emptyList()
+        }
+        if (userName == AuthUser.GUEST) {
+            return listOf(AuthRole.GUEST)
         }
         if (userName == AuthUser.SYSTEM) {
             error("System user can't use gateway")
