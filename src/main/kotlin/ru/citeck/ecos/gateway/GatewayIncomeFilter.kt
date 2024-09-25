@@ -28,6 +28,7 @@ import ru.citeck.ecos.context.lib.client.data.ClientData
 import ru.citeck.ecos.context.lib.ctx.EcosContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.context.lib.time.TimeZoneContext
+import ru.citeck.ecos.gateway.config.GatewayProps
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridge
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridgeFactory
 import ru.citeck.ecos.webapp.lib.web.http.EcosHttpHeaders
@@ -39,7 +40,8 @@ class GatewayIncomeFilter(
     private val reactorBridgeFactory: ReactorBridgeFactory,
     private val authoritiesProvider: AuthoritiesProvider,
     private val tracer: io.micrometer.tracing.Tracer,
-    private val ecosContext: EcosContext
+    private val ecosContext: EcosContext,
+    private val gatewayProps: GatewayProps
 ) : OrderedWebFilter {
 
     companion object {
@@ -47,6 +49,7 @@ class GatewayIncomeFilter(
     }
 
     private lateinit var getAuthoritiesBridge: ReactorBridge
+    private val userNameExtractors = gatewayProps.userNameExtractors.map { UserNameExtractor(it) }
 
     @PostConstruct
     fun init() {
@@ -54,11 +57,12 @@ class GatewayIncomeFilter(
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        val user = exchange.request.headers.getFirst(EcosHttpHeaders.X_ECOS_USER)
+        var user = exchange.request.headers.getFirst(EcosHttpHeaders.X_ECOS_USER)
 
         return if (user.isNullOrEmpty()) {
             chain.filter(exchange)
         } else {
+            user = extractUserName(user)
             filterWithUser(user, exchange, chain)
         }.doOnError { error ->
             logRequestError(user, exchange, error)
@@ -70,6 +74,17 @@ class GatewayIncomeFilter(
                 }
             }
         )
+    }
+
+    private fun extractUserName(user: String): String {
+        if (gatewayProps.userNameExtractors.isEmpty()) {
+            return user
+        }
+        for (extractor in userNameExtractors) {
+            val matchRes = extractor.matcher.matchEntire(user) ?: continue
+            return matchRes.groups[extractor.regexGroup]?.value ?: continue
+        }
+        return user
     }
 
     private fun logRequestError(user: String?, exchange: ServerWebExchange, error: Throwable?) {
@@ -189,5 +204,10 @@ class GatewayIncomeFilter(
             }
             return "$requestMethod $requestUri $statusCode ($lbMsg) $errorMsg"
         }
+    }
+
+    private class UserNameExtractor(props: GatewayProps.UserNameExtractor) {
+        val matcher = props.matcher.toRegex()
+        val regexGroup = props.regexGroup
     }
 }
