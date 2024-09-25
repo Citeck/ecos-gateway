@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
 
 class GatewayProps(
-    val userNameExtractors: List<UserNameExtractor>
+    val userNameExtractors: List<UserNameExtractor> = emptyList()
 ) {
 
     @JsonDeserialize(builder = UserNameExtractor.Builder::class)
