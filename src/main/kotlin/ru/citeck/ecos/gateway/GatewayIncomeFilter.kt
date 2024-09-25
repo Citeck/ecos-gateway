@@ -49,6 +49,7 @@ class GatewayIncomeFilter(
     }
 
     private lateinit var getAuthoritiesBridge: ReactorBridge
+    private val userNameExtractors = gatewayProps.userNameExtractors.map { UserNameExtractor(it) }
 
     @PostConstruct
     fun init() {
@@ -79,7 +80,7 @@ class GatewayIncomeFilter(
         if (gatewayProps.userNameExtractors.isEmpty()) {
             return user
         }
-        for (extractor in gatewayProps.userNameExtractors) {
+        for (extractor in userNameExtractors) {
             val matchRes = extractor.matcher.matchEntire(user) ?: continue
             return matchRes.groups[extractor.regexGroup]?.value ?: continue
         }
@@ -203,5 +204,10 @@ class GatewayIncomeFilter(
             }
             return "$requestMethod $requestUri $statusCode ($lbMsg) $errorMsg"
         }
+    }
+
+    private class UserNameExtractor(props: GatewayProps.UserNameExtractor) {
+        val matcher = props.matcher.toRegex()
+        val regexGroup = props.regexGroup
     }
 }
