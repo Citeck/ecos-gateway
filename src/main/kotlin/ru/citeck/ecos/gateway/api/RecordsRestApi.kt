@@ -36,6 +36,7 @@ import ru.citeck.ecos.records3.rest.v1.RequestResp
 import ru.citeck.ecos.records3.rest.v1.delete.DeleteResp
 import ru.citeck.ecos.records3.rest.v1.mutate.MutateResp
 import ru.citeck.ecos.records3.rest.v1.query.QueryResp
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridge
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridgeFactory
 import java.time.Instant
@@ -74,7 +75,7 @@ class RecordsRestApi @Autowired constructor(
     ): Mono<ResponseEntity<ByteArray>> {
         val bodyData = Json.mapper.readNotNull(body, ObjectNode::class.java)
         val version = bodyData.get("version").asInt(2)
-        return doInContext(QueryResp::class) {
+        return doInContext(QueryResp::class, true) {
             restHandlerAdapter.queryRecords(bodyData, version)
         }
     }
@@ -85,7 +86,7 @@ class RecordsRestApi @Autowired constructor(
         body: ByteArray
     ): Mono<ResponseEntity<ByteArray>> {
         val mutationBody = Json.mapper.readNotNull(body, ObjectNode::class.java)
-        return doInContext(MutateResp::class) {
+        return doInContext(MutateResp::class, false) {
             restHandlerAdapter.mutateRecords(mutationBody, 1)
         }
     }
@@ -96,23 +97,26 @@ class RecordsRestApi @Autowired constructor(
         body: ByteArray
     ): Mono<ResponseEntity<ByteArray>> {
         val deletionBody = Json.mapper.readNotNull(body, ObjectNode::class.java)
-        return doInContext(DeleteResp::class) {
+        return doInContext(DeleteResp::class, false) {
             restHandlerAdapter.deleteRecords(deletionBody, 1)
         }
     }
 
     private inline fun <R : RequestResp> doInContext(
         respType: KClass<R>,
+        readOnly: Boolean,
         crossinline action: () -> Any
     ): Mono<ResponseEntity<ByteArray>> {
 
         return ReactorEcosContextUtils.getFromContext().flatMap { contextData ->
             recordsReactorBridge.execute {
-                if (contextData.isEmpty) {
-                    encodeResponse(action.invoke())
-                } else {
-                    ecosContext.newScope(contextData.get()).use {
+                TxnContext.doInNewTxn(readOnly) {
+                    if (contextData.isEmpty) {
                         encodeResponse(action.invoke())
+                    } else {
+                        ecosContext.newScope(contextData.get()).use {
+                            encodeResponse(action.invoke())
+                        }
                     }
                 }
             }.onErrorResume { error ->
