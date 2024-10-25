@@ -34,7 +34,11 @@ class GatewaySecurityFilter {
                     .pathMatchers(
                         "/api/ecos/webapi",
                         "/pub/**",
-                        "/*/pub/**"
+                        "/*/pub/**",
+                        "/management/health",
+                        "/management/info",
+                        // Open metrics, because at current installations we always behind reverse proxy
+                        "/management/prometheus"
                     ).permitAll()
                     .pathMatchers(
                         "/api/**",
@@ -42,12 +46,12 @@ class GatewaySecurityFilter {
                         "/*/alfresco/**",
                         "/*/share/**"
                     ).hasAnyAuthority(AuthRole.USER)
-                    .pathMatchers("/management/health").permitAll()
-                    .pathMatchers("/*/management/**").hasAnyAuthority(AuthRole.ADMIN)
-                    .pathMatchers("/management/info").permitAll()
-                    // Open metrics, because at current installations we always behind reverse proxy
-                    .pathMatchers("/management/prometheus").permitAll()
-                    .pathMatchers("/management/**").hasAuthority(AuthRole.ADMIN)
+                    .pathMatchers(
+                        "/management",
+                        "/management/**",
+                        "/*/management",
+                        "/*/management/**"
+                    ).hasAnyAuthority(AuthRole.ADMIN, AuthRole.SYSTEM)
                     // allow to call custom endpoints in registered applications
                     .matchers(RegisteredWebAppMatcher(discoveryClient)).hasAnyAuthority(AuthRole.USER)
                     .anyExchange().denyAll()

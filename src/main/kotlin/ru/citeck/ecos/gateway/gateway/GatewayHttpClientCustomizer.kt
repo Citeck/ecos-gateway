@@ -4,7 +4,7 @@ import org.springframework.cloud.gateway.config.HttpClientCustomizer
 import org.springframework.stereotype.Component
 import reactor.netty.http.client.HttpClient
 import ru.citeck.ecos.commons.x509.EcosX509Registry
-import ru.citeck.ecos.webapp.lib.spring.context.webflux.NettyHttpClientUtils
+import ru.citeck.ecos.webapp.lib.spring.context.web.NettyHttpClientUtils
 import ru.citeck.ecos.webapp.lib.web.webapi.client.props.EcosWebClientProps
 
 @Component

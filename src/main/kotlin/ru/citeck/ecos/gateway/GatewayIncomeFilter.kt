@@ -3,6 +3,7 @@ package ru.citeck.ecos.gateway
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
 import org.slf4j.MDC
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.reactive.filter.OrderedWebFilter
 import org.springframework.cloud.client.ServiceInstance
 import org.springframework.cloud.client.loadbalancer.Response
@@ -31,6 +32,8 @@ import ru.citeck.ecos.context.lib.time.TimeZoneContext
 import ru.citeck.ecos.gateway.config.GatewayProps
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridge
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridgeFactory
+import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticatorsManager
+import ru.citeck.ecos.webapp.lib.web.authenticator.jwt.JwtAuthenticator
 import ru.citeck.ecos.webapp.lib.web.http.EcosHttpHeaders
 import java.net.URI
 import java.time.Duration
@@ -41,7 +44,8 @@ class GatewayIncomeFilter(
     private val authoritiesProvider: AuthoritiesProvider,
     private val tracer: io.micrometer.tracing.Tracer,
     private val ecosContext: EcosContext,
-    private val gatewayProps: GatewayProps
+    private val gatewayProps: GatewayProps,
+    private val authenticatorsManager: WebAuthenticatorsManager
 ) : OrderedWebFilter {
 
     companion object {
@@ -50,15 +54,27 @@ class GatewayIncomeFilter(
 
     private lateinit var getAuthoritiesBridge: ReactorBridge
     private val userNameExtractors = gatewayProps.userNameExtractors.map { UserNameExtractor(it) }
+    private lateinit var jwtAuthenticator: JwtAuthenticator
+
+    @Value("\${management.endpoints.web.base-path}/")
+    private lateinit var actuatorBasePath: String
 
     @PostConstruct
     fun init() {
         getAuthoritiesBridge = reactorBridgeFactory.getBridge("get-auth")
+        jwtAuthenticator = authenticatorsManager.getJwtAuthenticator("jwt")
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         var user = exchange.request.headers.getFirst(EcosHttpHeaders.X_ECOS_USER)
-
+        if (user.isNullOrBlank() && exchange.request.uri.path.startsWith(actuatorBasePath)) {
+            val auth = exchange.request.headers.getFirst(EcosHttpHeaders.AUTHORIZATION)
+            return if (auth.isNullOrBlank()) {
+                chain.filter(exchange)
+            } else {
+                filterWithAuth(exchange, chain, jwtAuthenticator.getAuthFromHeader(auth).runAs)
+            }
+        }
         return if (user.isNullOrEmpty()) {
             chain.filter(exchange)
         } else {
@@ -99,10 +115,6 @@ class GatewayIncomeFilter(
 
     private fun filterWithUser(user: String, exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
 
-        val tzOffset = readTimeZone(exchange.request.headers)
-        val locale = exchange.localeContext.locale ?: I18nContext.ENGLISH
-        val realIp = exchange.request.headers.getFirst(EcosHttpHeaders.X_REAL_IP)
-
         val traceId = tracer.currentTraceContext().context()?.traceId() ?: ""
         if (traceId.isNotBlank()) {
             exchange.response.headers.set(EcosHttpHeaders.X_ECOS_TRACE_ID, traceId)
@@ -111,27 +123,34 @@ class GatewayIncomeFilter(
         return getAuthoritiesBridge.execute {
             authoritiesProvider.getAuthorities(user)
         }.flatMap { authorities ->
-            val authData = SimpleAuthData(user, authorities)
-
-            val ctxData = ecosContext.newScope().use { scope ->
-
-                I18nContext.set(scope, locale)
-                ClientContext.set(scope, ClientData(realIp ?: ""))
-                TimeZoneContext.set(scope, tzOffset)
-                AuthContext.set(scope, AuthState(authData))
-
-                ecosContext.getScopeData()
-            }
-
-            chain.filter(exchange)
-                .contextWrite(
-                    ReactiveSecurityContextHolder.withAuthentication(
-                        buildAuthentication(authData)
-                    )
-                ).contextWrite(
-                    ReactorEcosContextUtils.withContextData(ctxData)
-                )
+            filterWithAuth(exchange, chain, SimpleAuthData(user, authorities))
         }
+    }
+
+    private fun filterWithAuth(exchange: ServerWebExchange, chain: WebFilterChain, authData: AuthData): Mono<Void> {
+
+        val tzOffset = readTimeZone(exchange.request.headers)
+        val locale = exchange.localeContext.locale ?: I18nContext.ENGLISH
+        val realIp = exchange.request.headers.getFirst(EcosHttpHeaders.X_REAL_IP)
+
+        val ctxData = ecosContext.newScope().use { scope ->
+
+            I18nContext.set(scope, locale)
+            ClientContext.set(scope, ClientData(realIp ?: ""))
+            TimeZoneContext.set(scope, tzOffset)
+            AuthContext.set(scope, AuthState(authData))
+
+            ecosContext.getScopeData()
+        }
+
+        return chain.filter(exchange)
+            .contextWrite(
+                ReactiveSecurityContextHolder.withAuthentication(
+                    buildAuthentication(authData)
+                )
+            ).contextWrite(
+                ReactorEcosContextUtils.withContextData(ctxData)
+            )
     }
 
     private fun readTimeZone(headers: org.springframework.http.HttpHeaders): Duration {
