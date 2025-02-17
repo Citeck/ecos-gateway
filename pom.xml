@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ecos-gateway</artifactId>
-    <version>2.12.0</version>
+    <version>2.12.1</version>
     <name>Gateway</name>
 
     <parent>
         <groupId>ru.citeck.ecos.webapp</groupId>
         <artifactId>ecos-webapp-spring-simple-parent</artifactId>
-        <version>1.16.3</version>
+        <version>1.16.8</version>
     </parent>
 
     <dependencies>
