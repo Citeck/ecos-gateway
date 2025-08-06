@@ -1,7 +1,6 @@
 ---
 type: 'maven-webapp'
 properties:
-  jdk: JDK21
+  jdk: JDK24
   image:
     multiplatform: true
-    #baseImage: openjdk:21-oraclelinux8
