@@ -24,9 +24,9 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.context.lib.ctx.EcosContext
 import ru.citeck.ecos.gateway.ReactorEcosContextUtils
+import ru.citeck.ecos.gateway.security.RecordsSecurityUtils
 import ru.citeck.ecos.records2.request.error.ErrorUtils
 import ru.citeck.ecos.records2.request.result.RecordsResult
-import ru.citeck.ecos.records2.utils.SecurityUtils
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.request.msg.MsgLevel
 import ru.citeck.ecos.records3.record.request.msg.MsgType
@@ -157,14 +157,14 @@ class RecordsRestApi @Autowired constructor(
                 status = HttpStatus.INTERNAL_SERVER_ERROR
             }
             if (isProdProfile) {
-                SecurityUtils.encodeResult(response)
+                RecordsSecurityUtils.encodeResult(response)
             }
         } else if (response is RequestResp) {
             if (response.messages.any { it.level == MsgLevel.ERROR }) {
                 status = HttpStatus.INTERNAL_SERVER_ERROR
             }
             if (isProdProfile) {
-                SecurityUtils.encodeResult(response)
+                RecordsSecurityUtils.encodeResult(response)
             }
         }
         val headers = HttpHeaders()
