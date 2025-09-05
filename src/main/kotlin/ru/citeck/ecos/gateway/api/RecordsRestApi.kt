@@ -74,7 +74,7 @@ class RecordsRestApi @Autowired constructor(
         body: ByteArray
     ): Mono<ResponseEntity<ByteArray>> {
         val bodyData = Json.mapper.readNotNull(body, ObjectNode::class.java)
-        val version = bodyData.get("version").asInt(2)
+        val version = bodyData.path("version").asInt(2)
         return doInContext(QueryResp::class, true) {
             restHandlerAdapter.queryRecords(bodyData, version)
         }
