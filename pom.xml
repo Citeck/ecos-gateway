@@ -5,7 +5,7 @@
 
 	<groupId>ru.citeck.ecos.gateway</groupId>
 	<artifactId>ecos-gateway</artifactId>
-	<version>3.3.0</version>
+	<version>3.4.0-SNAPSHOT</version>
 
 	<name>ecos-gateway</name>
 	<description>Citeck API Gateway</description>
