@@ -5,7 +5,7 @@
 
 	<groupId>ru.citeck.ecos.gateway</groupId>
 	<artifactId>ecos-gateway</artifactId>
-	<version>3.2.1</version>
+	<version>3.3.0</version>
 
 	<name>ecos-gateway</name>
 	<description>Citeck API Gateway</description>
@@ -13,7 +13,7 @@
     <parent>
         <groupId>ru.citeck.ecos.webapp</groupId>
         <artifactId>ecos-webapp-spring-webflux-base-parent</artifactId>
-        <version>3.13.5</version>
+        <version>3.18.7</version>
     </parent>
 
 	<properties>
