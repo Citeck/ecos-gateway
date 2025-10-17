@@ -1,4 +1,4 @@
-![Citeck ECOS Logo](https://raw.githubusercontent.com/Citeck/ecos-ui/develop/public/img/logo/ecos-logo.png)
+![Citeck ECOS Logo](https://raw.githubusercontent.com/Citeck/ecos-ui/develop/public/img/logo/ecos-logo.svg)
 
 # `ecos-gateway`
 
@@ -12,7 +12,7 @@ If you are new to Citeck platform and would like to load the software locally, w
 
 ## Dependencies
 
-To run this application the following applications from ECOS deployment are needed:
+To run this application the following applications from Citeck deployment are needed:
 
 * zookeeper
 * rabbitmq
