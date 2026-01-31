@@ -5,7 +5,7 @@
 
 	<groupId>ru.citeck.ecos.gateway</groupId>
 	<artifactId>ecos-gateway</artifactId>
-	<version>3.4.0</version>
+	<version>3.4.1</version>
 
 	<name>ecos-gateway</name>
 	<description>Citeck API Gateway</description>
@@ -17,8 +17,23 @@
     </parent>
 
 	<properties>
-
+		<spring-cloud-gateway.version>4.3.3</spring-cloud-gateway.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+            <!--
+            Fix  CVE-2025-41243 and CVE-2025-41253
+            -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-gateway-dependencies</artifactId>
+				<version>${spring-cloud-gateway.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 
@@ -29,7 +44,7 @@
 
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-gateway</artifactId>
+			<artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
 		</dependency>
 
         <dependency>
