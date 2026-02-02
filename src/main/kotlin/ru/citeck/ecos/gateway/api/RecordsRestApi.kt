@@ -110,10 +110,10 @@ class RecordsRestApi @Autowired constructor(
 
         return ReactorEcosContextUtils.getFromContext().flatMap { contextData ->
             recordsReactorBridge.execute {
-                TxnContext.doInNewTxn(readOnly) {
-                    if (contextData.isEmpty) {
-                        encodeResponse(action.invoke())
-                    } else {
+                if (contextData.isEmpty) {
+                    encodeResponse(action.invoke())
+                } else {
+                    TxnContext.doInNewTxn(readOnly) {
                         ecosContext.newScope(contextData.get()).use {
                             encodeResponse(action.invoke())
                         }
