@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>ru.citeck.ecos.gateway</groupId>
-	<artifactId>ecos-gateway</artifactId>
-	<version>3.5.0-SNAPSHOT</version>
+    <groupId>ru.citeck.ecos.gateway</groupId>
+    <artifactId>ecos-gateway</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
 
-	<name>ecos-gateway</name>
-	<description>Citeck API Gateway</description>
+    <name>ecos-gateway</name>
+    <description>Citeck API Gateway</description>
 
     <parent>
         <groupId>ru.citeck.ecos.webapp</groupId>
@@ -16,36 +16,36 @@
         <version>3.20.3</version>
     </parent>
 
-	<properties>
-		<spring-cloud-gateway.version>4.3.3</spring-cloud-gateway.version>
-	</properties>
+    <properties>
+        <spring-cloud-gateway.version>4.3.3</spring-cloud-gateway.version>
+    </properties>
 
-	<dependencyManagement>
-		<dependencies>
+    <dependencyManagement>
+        <dependencies>
             <!--
             Fix  CVE-2025-41243 and CVE-2025-41253
             -->
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-gateway-dependencies</artifactId>
-				<version>${spring-cloud-gateway.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-gateway-dependencies</artifactId>
+                <version>${spring-cloud-gateway.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<dependencies>
+    <dependencies>
 
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
 
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -59,20 +59,20 @@
 
     </dependencies>
 
-	<build>
-		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-		<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
-		<plugins>
+    <build>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+        <plugins>
 
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
 
-			<plugin>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<artifactId>kotlin-maven-plugin</artifactId>
-			</plugin>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+            </plugin>
 
             <plugin>
                 <groupId>ru.citeck.ecos.webapp</groupId>
@@ -84,9 +84,9 @@
                 <artifactId>jib-maven-plugin</artifactId>
             </plugin>
 
-		</plugins>
+        </plugins>
 
-	</build>
+    </build>
 
     <repositories>
         <repository>
