@@ -5,13 +5,11 @@ import ru.citeck.ecos.webapp.lib.spring.EcosSpringApplication
 
 @SpringBootApplication
 class EcosGateway {
-
     companion object {
         const val NAME = "gateway"
-
-        @JvmStatic
-        fun main(args: Array<String>) {
-            EcosSpringApplication(EcosGateway::class.java).run(*args)
-        }
     }
+}
+
+fun main(args: Array<String>) {
+    EcosSpringApplication(EcosGateway::class.java).run(*args)
 }
