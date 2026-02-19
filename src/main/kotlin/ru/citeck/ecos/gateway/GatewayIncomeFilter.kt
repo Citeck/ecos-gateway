@@ -75,7 +75,7 @@ class GatewayIncomeFilter(
                 filterWithAuth(exchange, chain, jwtAuthenticator.getAuthFromHeader(auth).runAs)
             }
         }
-        return if (user.isNullOrEmpty()) {
+        return if (user.isNullOrBlank()) {
             chain.filter(exchange)
         } else {
             user = extractUserName(user)
@@ -104,7 +104,7 @@ class GatewayIncomeFilter(
     }
 
     private fun logRequestError(user: String?, exchange: ServerWebExchange, error: Throwable?) {
-        if (user.isNullOrEmpty()) {
+        if (user.isNullOrBlank()) {
             log.error { extractErrorMsg(exchange, error) }
         } else {
             MDC.putCloseable(AuthConstants.MDC_USER_KEY, user).use {

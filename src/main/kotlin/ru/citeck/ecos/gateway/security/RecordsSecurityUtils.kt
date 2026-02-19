@@ -6,13 +6,12 @@ import ru.citeck.ecos.records2.request.error.RecordsError
 import ru.citeck.ecos.records2.request.result.RecordsResult
 import ru.citeck.ecos.records3.record.request.msg.ReqMsg
 import ru.citeck.ecos.records3.rest.v1.RequestResp
-import java.util.regex.Pattern
-import java.util.stream.Collectors
 
 object RecordsSecurityUtils {
 
-    private val CLASS_PATTERN: Pattern = Pattern.compile("([a-z0-9]+\\.)+[A-Z][a-zA-Z0-9]*")
-    private val CLASS_LINE_PATTERN: Pattern = Pattern.compile("\\([a-zA-Z0-9]+\\.java:(\\d+)\\)")
+    private val CLASS_PATTERN = "([a-z0-9]+\\.)+[A-Z][a-zA-Z0-9]*".toRegex()
+    private val CLASS_LINE_PATTERN = "\\([a-zA-Z0-9]+\\.java:(\\d+)\\)".toRegex()
+    private val LOWERCASE_PATTERN = "[a-z]".toRegex()
 
     fun encodeResult(result: RequestResp) {
         val messages: List<ReqMsg> = result.messages
@@ -30,10 +29,7 @@ object RecordsSecurityUtils {
     }
 
     fun <T> encodeResult(result: RecordsResult<T>): RecordsResult<T> {
-        result.errors = result.errors
-            .stream()
-            .map { encodeError(it) }
-            .collect(Collectors.toList())
+        result.errors = result.errors.map { encodeError(it) }
         return result
     }
 
@@ -46,10 +42,7 @@ object RecordsSecurityUtils {
 
         val stackTrace = error.stackTrace
         if (stackTrace != null && stackTrace.isNotEmpty()) {
-            error.stackTrace = stackTrace
-                .stream()
-                .map { obj: String? -> encodeClasses(obj) }
-                .collect(Collectors.toList())
+            error.stackTrace = stackTrace.map { encodeClasses(it) }
         }
 
         return error
@@ -60,32 +53,26 @@ object RecordsSecurityUtils {
             return null
         }
 
-        var matcher = CLASS_PATTERN.matcher(str)
-        var resultStr: String = str
-
         val builder = StringBuilder()
 
-        while (matcher.find()) {
-            val className = matcher.group(0)
-            val packageAndClass = className.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        var resultStr = CLASS_PATTERN.replace(str) { matchResult ->
+            val className = matchResult.value
+            val packageAndClass = className.split(".")
             if (packageAndClass.size < 2) {
-                continue
+                className
+            } else {
+                builder.setLength(0)
+                for (i in 0..<packageAndClass.size - 1) {
+                    builder.append(packageAndClass[i][0])
+                }
+                val classShortName = packageAndClass[packageAndClass.size - 1]
+                builder.append(classShortName.replace(LOWERCASE_PATTERN, ""))
+                builder.toString()
             }
-
-            builder.setLength(0)
-            for (i in 0..<packageAndClass.size - 1) {
-                builder.append(packageAndClass[i][0])
-            }
-
-            val classShortName = packageAndClass[packageAndClass.size - 1]
-            builder.append(classShortName.replace("[a-z]".toRegex(), ""))
-
-            resultStr = resultStr.replace(className, builder.toString())
         }
 
-        matcher = CLASS_LINE_PATTERN.matcher(resultStr)
-        while (matcher.find()) {
-            resultStr = resultStr.replace(matcher.group(0), matcher.group(1))
+        resultStr = CLASS_LINE_PATTERN.replace(resultStr) { matchResult ->
+            matchResult.groupValues[1]
         }
 
         return resultStr
