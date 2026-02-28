@@ -1,6 +1,10 @@
 ---
 server:
   port: 8085
+  undertow:
+    # -1 does NOT work (Spring Boot DataSize parsing rejects negative values).
+    # Use a large positive value. The gateway is a reverse proxy; backends enforce their own limits.
+    max-http-post-size: 100GB
 
 spring:
   http:
