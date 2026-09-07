@@ -1,6 +1,7 @@
 package ru.citeck.ecos.gateway
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.opentelemetry.api.trace.Span
 import jakarta.annotation.PostConstruct
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
@@ -30,6 +31,7 @@ import ru.citeck.ecos.context.lib.ctx.EcosContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.context.lib.time.TimeZoneContext
 import ru.citeck.ecos.gateway.config.GatewayProps
+import ru.citeck.ecos.webapp.lib.spring.autoconfigure.tracing.EcosUserSpanProcessor
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridge
 import ru.citeck.ecos.webapp.lib.spring.context.webflux.bridge.ReactorBridgeFactory
 import ru.citeck.ecos.webapp.lib.web.authenticator.WebAuthenticatorsManager
@@ -141,6 +143,15 @@ class GatewayIncomeFilter(
             AuthContext.set(scope, AuthState(authData))
 
             ecosContext.getScopeData()
+        }
+
+        // Tag the root HTTP span with ecos.user after auth is resolved so the
+        // observer's watched-users filter can bypass the duration filter for
+        // this trace (descendants started after this point are tagged by
+        // EcosUserSpanProcessor.onStart via AuthContext).
+        val user = authData.getUser()
+        if (user.isNotBlank()) {
+            Span.current().setAttribute(EcosUserSpanProcessor.ECOS_USER, user)
         }
 
         return chain.filter(exchange)
